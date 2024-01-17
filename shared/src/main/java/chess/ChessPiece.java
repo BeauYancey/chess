@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -10,7 +11,12 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -29,14 +35,26 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
+    }
+
+    private int validateAddMove(ArrayList<ChessMove> moveList, ChessBoard board, ChessPosition myPosition, ChessPosition newPosition) {
+        if (board.getPiece(newPosition) == null) {
+            moveList.add(new ChessMove(myPosition, newPosition, null));
+            return 1;
+        } else {
+            if (board.getPiece(newPosition).pieceColor != board.getPiece(myPosition).pieceColor) {
+                moveList.add(new ChessMove(myPosition, newPosition, null));
+            }
+            return -1;
+        }
     }
 
     /**
@@ -47,6 +65,60 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(myPosition);
+        ChessPiece.PieceType type = piece.getPieceType();
+        ArrayList<ChessMove> moveList = new ArrayList<>();
+        if (type == PieceType.BISHOP) {
+            for (int i = 1; i < 8; i++) { // Go towards the top-right
+                int row = myPosition.getRow() + i;
+                int col = myPosition.getColumn() + i;
+
+                if (row > 8 || col > 8) { break; } // Out of bounds
+
+                ChessPosition newPosition = new ChessPosition(row, col);
+                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++) { // Go towards the top-left
+                int row = myPosition.getRow() + i;
+                int col = myPosition.getColumn() - i;
+
+                if (row > 8 || col < 1) { break; } // Out of bounds
+
+                ChessPosition newPosition = new ChessPosition(row, col);
+                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++) { // Go towards the bottom-right
+                int row = myPosition.getRow() - i;
+                int col = myPosition.getColumn() + i;
+
+                if (row < 1 || col > 8) { break; } // Out of bounds
+
+                ChessPosition newPosition = new ChessPosition(row, col);
+                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++) { // Go towards the bottom-left
+                int row = myPosition.getRow() - i;
+                int col = myPosition.getColumn() - i;
+
+                if (row < 1 || col < 1) { break; } // Out of bounds
+
+                ChessPosition newPosition = new ChessPosition(row, col);
+                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    break;
+                }
+            }
+        }
+        if (type == PieceType.KING) {}
+        if (type == PieceType.KNIGHT) {}
+        if (type == PieceType.PAWN) {}
+        if (type == PieceType.QUEEN) {}
+        if (type == PieceType.ROOK) {}
+        return moveList;
     }
 }
