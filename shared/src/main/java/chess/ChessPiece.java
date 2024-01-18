@@ -114,7 +114,23 @@ public class ChessPiece {
                 }
             }
         }
-        if (type == PieceType.KING) {}
+        if (type == PieceType.KING) {
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) {
+                        continue;
+                    }
+                    int row = myPosition.getRow() + i;
+                    int col = myPosition.getColumn() + j;
+
+                    if (row > 8 || row < 1 || col > 8 || col < 1) {
+                        continue;
+                    }
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    validateAddMove(moveList, board, myPosition, newPosition);
+                }
+            }
+        }
         if (type == PieceType.KNIGHT) {}
         if (type == PieceType.PAWN) {}
         if (type == PieceType.QUEEN) {}
