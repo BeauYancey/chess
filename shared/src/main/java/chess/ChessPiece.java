@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Represents a single chess piece
@@ -45,7 +46,7 @@ public class ChessPiece {
         return type;
     }
 
-    private int validateAddMove(ArrayList<ChessMove> moveList, ChessBoard board, ChessPosition myPosition, ChessPosition newPosition) {
+    private int validateAddMove(HashSet<ChessMove> moveList, ChessBoard board, ChessPosition myPosition, ChessPosition newPosition) {
         if (board.getPiece(newPosition) == null) {
             moveList.add(new ChessMove(myPosition, newPosition, null));
             return 1;
@@ -67,7 +68,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         ChessPiece.PieceType type = piece.getPieceType();
-        ArrayList<ChessMove> moveList = new ArrayList<>();
+        HashSet<ChessMove> moveList = new HashSet<>();
         if (type == PieceType.BISHOP) {
             for (int i = 1; i < 8; i++) { // Go towards the top-right
                 int row = myPosition.getRow() + i;
@@ -145,19 +146,53 @@ public class ChessPiece {
             }
         }
         if (type == PieceType.PAWN) {
-            if (piece.pieceColor == ChessGame.TeamColor.WHITE) {
-                boolean firstMove = (myPosition.getRow() == 2);
-                ChessPosition newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
-                if (validateAddMove(moveList, board, myPosition, newPosition) == 1 && firstMove) {
-                    ChessPosition initialDouble = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
-                    validateAddMove(moveList, board, myPosition, initialDouble);
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+            ChessPiece.PieceType[] promos = {PieceType.KNIGHT, PieceType.ROOK, PieceType.QUEEN, PieceType.BISHOP};
+
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                if (row == 8) {
+                    return moveList;
                 }
-            } else {
-                boolean firstMove = (myPosition.getRow() == 7);
-                ChessPosition newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
-                if (validateAddMove(moveList, board, myPosition, newPosition) == 1 && firstMove) {
-                    ChessPosition initialDouble = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-                    validateAddMove(moveList, board, myPosition, initialDouble);
+                ChessPosition forward = new ChessPosition(row + 1, col);
+                if (board.getPiece(forward) == null) { // can move forward
+                    if (row == 7) { // is promoted
+                        for (ChessPiece.PieceType p : promos) {
+                            moveList.add(new ChessMove(myPosition, forward, p));
+                        }
+                    } else { // is not promoted
+                        moveList.add(new ChessMove(myPosition, forward, null));
+                        if (row == 2) { // initial move can be two spaces
+                            ChessPosition twoSpaces = new ChessPosition(row + 2, col);
+                            if (board.getPiece(twoSpaces) == null) {
+                                moveList.add(new ChessMove(myPosition, twoSpaces, null));
+                            }
+                        }
+                    }
+                }
+                ChessPosition left = new ChessPosition(row + 1, col - 1);
+                if (col != 1) { // not on the left edge
+                    if (board.getPiece(left) != null && board.getPiece(left).getTeamColor() == ChessGame.TeamColor.BLACK) {
+                        if (row == 7) { // is promoted
+                            for (ChessPiece.PieceType p : promos) {
+                                moveList.add(new ChessMove(myPosition, left, p));
+                            }
+                        } else { // is not promoted
+                            moveList.add(new ChessMove(myPosition, left, null));
+                        }
+                    }
+                }
+                ChessPosition right = new ChessPosition(row + 1, col + 1);
+                if (col != 8) { // not on the right edge
+                    if (board.getPiece(right) != null && board.getPiece(right).getTeamColor() == ChessGame.TeamColor.BLACK) {
+                        if (row == 7) { // is promoted
+                            for (ChessPiece.PieceType p : promos) {
+                                moveList.add(new ChessMove(myPosition, right, p));
+                            }
+                        } else { // is not promoted
+                            moveList.add(new ChessMove(myPosition, right, null));
+                        }
+                    }
                 }
             }
         }
