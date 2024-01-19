@@ -144,7 +144,23 @@ public class ChessPiece {
                 validateAddMove(moveList, board, myPosition, newPosition);
             }
         }
-        if (type == PieceType.PAWN) {}
+        if (type == PieceType.PAWN) {
+            if (piece.pieceColor == ChessGame.TeamColor.WHITE) {
+                boolean firstMove = (myPosition.getRow() == 2);
+                ChessPosition newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+                if (validateAddMove(moveList, board, myPosition, newPosition) == 1 && firstMove) {
+                    ChessPosition initialDouble = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
+                    validateAddMove(moveList, board, myPosition, initialDouble);
+                }
+            } else {
+                boolean firstMove = (myPosition.getRow() == 7);
+                ChessPosition newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+                if (validateAddMove(moveList, board, myPosition, newPosition) == 1 && firstMove) {
+                    ChessPosition initialDouble = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                    validateAddMove(moveList, board, myPosition, initialDouble);
+                }
+            }
+        }
         if (type == PieceType.QUEEN) {}
         if (type == PieceType.ROOK) {}
         return moveList;
