@@ -131,7 +131,19 @@ public class ChessPiece {
                 }
             }
         }
-        if (type == PieceType.KNIGHT) {}
+        if (type == PieceType.KNIGHT) {
+            int[][] moves = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};
+            for (int[] i : moves) {
+                int row = myPosition.getRow() + i[0];
+                int col = myPosition.getColumn() + i[1];
+
+                if (row > 8 || row < 1 || col > 8 || col < 1) {
+                    continue;
+                }
+                ChessPosition newPosition = new ChessPosition(row, col);
+                validateAddMove(moveList, board, myPosition, newPosition);
+            }
+        }
         if (type == PieceType.PAWN) {}
         if (type == PieceType.QUEEN) {}
         if (type == PieceType.ROOK) {}
