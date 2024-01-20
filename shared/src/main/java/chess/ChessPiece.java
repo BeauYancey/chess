@@ -195,6 +195,51 @@ public class ChessPiece {
                     }
                 }
             }
+            else {
+                if (row == 1) {
+                    return moveList;
+                }
+                ChessPosition forward = new ChessPosition(row - 1, col);
+                if (board.getPiece(forward) == null) { // can move forward
+                    if (row == 2) { // is promoted
+                        for (ChessPiece.PieceType p : promos) {
+                            moveList.add(new ChessMove(myPosition, forward, p));
+                        }
+                    } else { // is not promoted
+                        moveList.add(new ChessMove(myPosition, forward, null));
+                        if (row == 7) { // initial move can be two spaces
+                            ChessPosition twoSpaces = new ChessPosition(row - 2, col);
+                            if (board.getPiece(twoSpaces) == null) {
+                                moveList.add(new ChessMove(myPosition, twoSpaces, null));
+                            }
+                        }
+                    }
+                }
+                ChessPosition left = new ChessPosition(row - 1, col - 1);
+                if (col != 1) { // not on the left edge
+                    if (board.getPiece(left) != null && board.getPiece(left).getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        if (row == 2) { // is promoted
+                            for (ChessPiece.PieceType p : promos) {
+                                moveList.add(new ChessMove(myPosition, left, p));
+                            }
+                        } else { // is not promoted
+                            moveList.add(new ChessMove(myPosition, left, null));
+                        }
+                    }
+                }
+                ChessPosition right = new ChessPosition(row - 1, col + 1);
+                if (col != 8) { // not on the right edge
+                    if (board.getPiece(right) != null && board.getPiece(right).getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        if (row == 2) { // is promoted
+                            for (ChessPiece.PieceType p : promos) {
+                                moveList.add(new ChessMove(myPosition, right, p));
+                            }
+                        } else { // is not promoted
+                            moveList.add(new ChessMove(myPosition, right, null));
+                        }
+                    }
+                }
+            }
         }
         if (type == PieceType.QUEEN) {}
         if (type == PieceType.ROOK) {}
