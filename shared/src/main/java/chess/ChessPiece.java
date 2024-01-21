@@ -260,7 +260,24 @@ public class ChessPiece {
                 }
             }
         }
-        if (type == PieceType.ROOK) {}
+        if (type == PieceType.ROOK) {
+            int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+            for (int[] dir : directions) {
+                for (int mul = 1; mul <= 8; mul++) {
+                    int row = myPosition.getRow() + (mul * dir[0]);
+                    int col = myPosition.getColumn() + (mul * dir[1]);
+
+                    if (row < 1 || row > 8 || col < 1 || col > 8) {
+                        break;
+                    }
+
+                    ChessPosition newPostition = new ChessPosition(row, col);
+                    if (validateAddMove(moveList, board, myPosition, newPostition) == -1) {
+                        break;
+                    }
+                }
+            }
+        }
         return moveList;
     }
 }
