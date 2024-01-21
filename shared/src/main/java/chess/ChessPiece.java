@@ -241,7 +241,25 @@ public class ChessPiece {
                 }
             }
         }
-        if (type == PieceType.QUEEN) {}
+        if (type == PieceType.QUEEN) {
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    for (int mul = 1; mul <= 8; mul++) {
+                        int row = myPosition.getRow() + (mul * i);
+                        int col = myPosition.getColumn() + (mul * j);
+
+                        if (row < 1 || row > 8 || col < 1 || col > 8) {
+                            break;
+                        }
+
+                        ChessPosition newPosition = new ChessPosition(row, col);
+                        if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         if (type == PieceType.ROOK) {}
         return moveList;
     }
