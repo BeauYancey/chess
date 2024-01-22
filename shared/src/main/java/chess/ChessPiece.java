@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -71,48 +70,20 @@ public class ChessPiece {
         ChessPiece.PieceType type = piece.getPieceType();
         HashSet<ChessMove> moveList = new HashSet<>();
         if (type == PieceType.BISHOP) {
-            for (int i = 1; i < 8; i++) { // Go towards the top-right
-                int row = myPosition.getRow() + i;
-                int col = myPosition.getColumn() + i;
+            int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            for (int[] dir : directions) {
+                for (int mul = 1; mul <= 8; mul++) {
+                    int row = myPosition.getRow() + (mul * dir[0]);
+                    int col = myPosition.getColumn() + (mul * dir[1]);
 
-                if (row > 8 || col > 8) { break; } // Out of bounds
+                    if (row < 1 || row > 8 || col < 1 || col > 8) {
+                        break;
+                    }
 
-                ChessPosition newPosition = new ChessPosition(row, col);
-                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
-                    break;
-                }
-            }
-            for (int i = 1; i < 8; i++) { // Go towards the top-left
-                int row = myPosition.getRow() + i;
-                int col = myPosition.getColumn() - i;
-
-                if (row > 8 || col < 1) { break; } // Out of bounds
-
-                ChessPosition newPosition = new ChessPosition(row, col);
-                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
-                    break;
-                }
-            }
-            for (int i = 1; i < 8; i++) { // Go towards the bottom-right
-                int row = myPosition.getRow() - i;
-                int col = myPosition.getColumn() + i;
-
-                if (row < 1 || col > 8) { break; } // Out of bounds
-
-                ChessPosition newPosition = new ChessPosition(row, col);
-                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
-                    break;
-                }
-            }
-            for (int i = 1; i < 8; i++) { // Go towards the bottom-left
-                int row = myPosition.getRow() - i;
-                int col = myPosition.getColumn() - i;
-
-                if (row < 1 || col < 1) { break; } // Out of bounds
-
-                ChessPosition newPosition = new ChessPosition(row, col);
-                if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
-                    break;
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                        break;
+                    }
                 }
             }
         }
@@ -272,8 +243,8 @@ public class ChessPiece {
                         break;
                     }
 
-                    ChessPosition newPostition = new ChessPosition(row, col);
-                    if (validateAddMove(moveList, board, myPosition, newPostition) == -1) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
                         break;
                     }
                 }
