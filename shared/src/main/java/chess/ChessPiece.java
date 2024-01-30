@@ -46,15 +46,15 @@ public class ChessPiece {
         return type;
     }
 
-    private int validateAddMove(HashSet<ChessMove> moveList, ChessBoard board, ChessPosition myPosition, ChessPosition newPosition) {
+    private boolean addMove(HashSet<ChessMove> moveList, ChessBoard board, ChessPosition myPosition, ChessPosition newPosition) {
         if (board.getPiece(newPosition) == null) {
             moveList.add(new ChessMove(myPosition, newPosition, null));
-            return 1;
+            return true; // continue
         } else {
             if (board.getPiece(newPosition).pieceColor != board.getPiece(myPosition).pieceColor) {
                 moveList.add(new ChessMove(myPosition, newPosition, null));
             }
-            return -1;
+            return false; // stop going that direction
         }
     }
 
@@ -81,7 +81,7 @@ public class ChessPiece {
                     }
 
                     ChessPosition newPosition = new ChessPosition(row, col);
-                    if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    if (!addMove(moveList, board, myPosition, newPosition)) {
                         break;
                     }
                 }
@@ -100,7 +100,7 @@ public class ChessPiece {
                         continue;
                     }
                     ChessPosition newPosition = new ChessPosition(row, col);
-                    validateAddMove(moveList, board, myPosition, newPosition);
+                    addMove(moveList, board, myPosition, newPosition);
                 }
             }
         }
@@ -114,7 +114,7 @@ public class ChessPiece {
                     continue;
                 }
                 ChessPosition newPosition = new ChessPosition(row, col);
-                validateAddMove(moveList, board, myPosition, newPosition);
+                addMove(moveList, board, myPosition, newPosition);
             }
         }
         if (type == PieceType.PAWN) {
@@ -214,20 +214,19 @@ public class ChessPiece {
             }
         }
         if (type == PieceType.QUEEN) {
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    for (int mul = 1; mul <= 8; mul++) {
-                        int row = myPosition.getRow() + (mul * i);
-                        int col = myPosition.getColumn() + (mul * j);
+            int[][] directions = {{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0},{-1,1}};
+            for (int[] dir : directions) {
+                for (int mul = 1; mul <= 8; mul++) {
+                    int row = myPosition.getRow() + (mul * dir[0]);
+                    int col = myPosition.getColumn() + (mul * dir[1]);
 
-                        if (row < 1 || row > 8 || col < 1 || col > 8) {
-                            break;
-                        }
+                    if (row < 1 || row > 8 || col < 1 || col > 8) {
+                        break;
+                    }
 
-                        ChessPosition newPosition = new ChessPosition(row, col);
-                        if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
-                            break;
-                        }
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    if (!addMove(moveList, board, myPosition, newPosition)) {
+                        break;
                     }
                 }
             }
@@ -244,7 +243,7 @@ public class ChessPiece {
                     }
 
                     ChessPosition newPosition = new ChessPosition(row, col);
-                    if (validateAddMove(moveList, board, myPosition, newPosition) == -1) {
+                    if (!addMove(moveList, board, myPosition, newPosition)) {
                         break;
                     }
                 }
