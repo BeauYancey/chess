@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -14,7 +15,10 @@ public class ChessGame {
     private TeamColor team;
 
     public ChessGame() {
+        board = new ChessBoard();
+        board.resetBoard();
 
+        team = TeamColor.WHITE;
     }
 
     /**
@@ -62,6 +66,20 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+    private Collection<ChessMove> getAllMoves(TeamColor teamColor) {
+        HashSet<ChessMove> allMoves = new HashSet<>();
+        for (int row = 1; row <= 8; row ++) {
+            for (int col = 1; col <= 8; col ++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece != null) {
+                    allMoves.addAll(piece.pieceMoves(board, pos));
+                }
+            }
+        }
+        return allMoves;
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -69,7 +87,14 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        TeamColor enemy = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        for (ChessMove move : getAllMoves(enemy)) {
+            ChessPiece inPeril = board.getPiece(move.getEndPosition());
+            if (inPeril != null && inPeril.getTeamColor() == teamColor && inPeril.getPieceType() == ChessPiece.PieceType.KING) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
