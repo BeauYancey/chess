@@ -264,4 +264,9 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(pieceColor, type);
     }
+
+    @Override
+    public ChessPiece clone() {
+        return new ChessPiece(pieceColor, type);
+    }
 }
