@@ -56,6 +56,24 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+    private void attemptMove(ChessMove move){
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (move.getPromotionPiece() != null) {
+            piece.promote(move.getPromotionPiece());
+        }
+        board.addPiece(move.getEndPosition(), piece);
+        board.removePiece(move.getStartPosition());
+    }
+
+    private void undoMove(ChessMove move, ChessPiece before) {
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+        if (move.getPromotionPiece() != null) {
+            piece.promote(ChessPiece.PieceType.PAWN);
+        }
+        board.addPiece(move.getStartPosition(), piece);
+        board.addPiece(move.getEndPosition(), before);
+    }
+
     /**
      * Makes a move in a chess game
      *
@@ -72,7 +90,7 @@ public class ChessGame {
             for (int col = 1; col <= 8; col ++) {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
-                if (piece != null) {
+                if (piece != null && piece.getTeamColor() == teamColor) {
                     allMoves.addAll(piece.pieceMoves(board, pos));
                 }
             }
@@ -107,13 +125,15 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         } else {
-            for (ChessMove move : getAllMoves(teamColor)) {
-                ChessBoard boardClone = board.clone();
-                boardClone.addPiece(move.getEndPosition(), boardClone.getPiece(move.getStartPosition()));
-                boardClone.removePiece(move.getStartPosition());
-                if (! isInCheck(teamColor)) {
+            Collection<ChessMove> allMoves = getAllMoves(teamColor);
+            for (ChessMove move : allMoves) {
+                ChessPiece before = board.getPiece(move.getEndPosition());
+                attemptMove(move);
+                if (!isInCheck(teamColor)) {
+                    undoMove(move, before);
                     return false;
                 }
+                undoMove(move, before);
             }
             return true;
         }

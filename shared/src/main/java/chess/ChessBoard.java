@@ -92,20 +92,6 @@ public class ChessBoard {
     }
 
     @Override
-    public ChessBoard clone() {
-        ChessBoard c = new ChessBoard();
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8 ; j++) {
-                ChessPosition pos = new ChessPosition(i, j);
-                if (this.getPiece(pos) != null) {
-                    c.addPiece(pos, this.getPiece(pos).clone());
-                }
-            }
-        }
-        return c;
-    }
-
-    @Override
     public String toString() {
         String boardString = "\n";
 
