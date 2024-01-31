@@ -24,6 +24,10 @@ public class ChessBoard {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
+    public void removePiece(ChessPosition position) {
+        squares[position.getRow()-1][position.getColumn()-1] = null;
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -93,7 +97,9 @@ public class ChessBoard {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8 ; j++) {
                 ChessPosition pos = new ChessPosition(i, j);
-                c.addPiece(pos, this.getPiece(pos).clone());
+                if (this.getPiece(pos) != null) {
+                    c.addPiece(pos, this.getPiece(pos).clone());
+                }
             }
         }
         return c;
