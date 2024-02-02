@@ -95,12 +95,12 @@ public class ChessGame {
         ChessPosition startPos = move.getStartPosition();
         ChessPiece piece = board.getPiece(startPos);
         if (piece.getTeamColor() != getTeamTurn()) {
-            TeamColor attempted = piece.getTeamColor();
-            String str = "You attempted to move a " + attempted + " piece but the current turn is " + getTeamTurn();
-            throw new InvalidMoveException(str);
+            String msg = "You attempted to move a " + piece.getTeamColor() + " piece but the current turn is " + getTeamTurn();
+            throw new InvalidMoveException(msg);
         }
         if (!validMoves(startPos).contains(move)) {
-            throw new InvalidMoveException("Cannot Move There");
+            String msg = piece.getPieceType() + " at " + move.getStartPosition() + " cannot move to " + move.getEndPosition();
+            throw new InvalidMoveException(msg);
         }
         attemptMove(move);
         if (getTeamTurn() == TeamColor.WHITE) {
