@@ -110,16 +110,25 @@ public class ChessGame {
         }
     }
 
-    private Collection<ChessMove> getAllMoves(TeamColor teamColor) {
-        HashSet<ChessMove> allMoves = new HashSet<>();
+    private Collection<ChessPosition> getAllPositions(TeamColor teamColor){
+        HashSet<ChessPosition> allPositions = new HashSet<>();
         for (int row = 1; row <= 8; row ++) {
-            for (int col = 1; col <= 8; col ++) {
+            for (int col = 1; col <= 8; col++) {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
                 if (piece != null && piece.getTeamColor() == teamColor) {
-                    allMoves.addAll(piece.pieceMoves(board, pos));
+                    allPositions.add(pos);
                 }
             }
+        }
+        return allPositions;
+    }
+
+    private Collection<ChessMove> getAllMoves(TeamColor teamColor) {
+        HashSet<ChessMove> allMoves = new HashSet<>();
+        for (ChessPosition pos : getAllPositions(teamColor)) {
+            ChessPiece piece = board.getPiece(pos);
+            allMoves.addAll(piece.pieceMoves(board, pos));
         }
         return allMoves;
     }
@@ -173,7 +182,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
