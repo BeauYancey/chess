@@ -1,19 +1,13 @@
 package requestResponse;
 
-public class ClearResponse {
-    private final transient int status;
-    private final String message;
+import java.util.HashMap;
 
-    public ClearResponse(int status, String message) {
-        this.status = status;
-        this.message = message;
+public class ClearResponse extends Response {
+    public ClearResponse(int status, HashMap<String, String> headers) {
+        super(status, headers);
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
+    public ClearResponse(int status, HashMap<String, String> headers, String message) {
+        super(status, headers, message);
     }
 }
