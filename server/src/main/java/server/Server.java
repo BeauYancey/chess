@@ -1,6 +1,7 @@
 package server;
 
 import handler.ClearHandler;
+import handler.GameHandler;
 import handler.UserHandler;
 import spark.*;
 
@@ -16,6 +17,7 @@ public class Server {
         Spark.post("/user", UserHandler::register);
         Spark.post("/session", UserHandler::login);
         Spark.delete("/session", UserHandler::logout);
+        Spark.get("/game", GameHandler::listGames);
 
         Spark.awaitInitialization();
         return Spark.port();

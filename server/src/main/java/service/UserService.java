@@ -1,5 +1,6 @@
 package service;
 
+import model.AuthData;
 import requestResponse.LoginRequest;
 import requestResponse.LoginResponse;
 import requestResponse.RegisterRequest;
@@ -26,5 +27,13 @@ public class UserService {
         return new LoginResponse(request.username(), authToken);
     }
 
-    public static void logout(String authToken) {}
+    public static void logout(String authToken) {
+        // check that the user exists and is logged in
+        AuthData user = verifyAuth(authToken);
+        // remove entry from auth database
+    }
+
+    public static AuthData verifyAuth (String authToken) {
+        return new AuthData("authToken", "testUser");
+    }
 }
