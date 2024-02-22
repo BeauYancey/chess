@@ -1,6 +1,7 @@
 package server;
 
 import handler.ClearHandler;
+import handler.UserHandler;
 import spark.*;
 
 public class Server {
@@ -12,6 +13,7 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", ClearHandler::clear);
+        Spark.post("/user", UserHandler::register);
 
         Spark.awaitInitialization();
         return Spark.port();
