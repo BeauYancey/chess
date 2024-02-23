@@ -1,5 +1,6 @@
 package server;
 
+import dataAccess.*;
 import handler.ClearHandler;
 import handler.GameHandler;
 import handler.UserHandler;
@@ -13,7 +14,11 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.delete("/db", ClearHandler::clear);
+        AuthDAO auths = new MemoryAuthDAO();
+        UserDAO users = new MemoryUserDAO();
+        GameDAO games = new MemoryGameDAO();
+
+        Spark.delete("/db", (Request req, Response res) -> ClearHandler.clear(req, res, auths, users, games));
         Spark.post("/user", UserHandler::register);
         Spark.post("/session", UserHandler::login);
         Spark.delete("/session", UserHandler::logout);
