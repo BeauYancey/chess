@@ -1,20 +1,31 @@
 package service;
 
+import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import model.AuthData;
+import model.UserData;
 import requestResponse.LoginRequest;
 import requestResponse.LoginResponse;
 import requestResponse.RegisterRequest;
 import requestResponse.RegisterResponse;
+import service.exception.Exception400;
+import service.exception.Exception403;
 
 import java.util.UUID;
 
 public class UserService {
 
-    public static RegisterResponse register(RegisterRequest request) {
-        // make sure the username isn't already in use
-        // add information to the user database
-        // add information to auth database
+    public static RegisterResponse register(RegisterRequest request, AuthDAO auths, UserDAO users) throws Exception400, Exception403 {
+        if (request.username() == null || request.password() == null || request.email() == null) {
+            throw new Exception400();
+        }
+        if (users.getUser(request.username()) != null) {
+            throw new Exception403();
+        }
+
+        users.addUser(new UserData(request.username(), request.password(), request.email()));
         String authToken = UUID.randomUUID().toString();
+        auths.addAuth(new AuthData(authToken, request.username()));
 
         return new RegisterResponse(authToken);
     }

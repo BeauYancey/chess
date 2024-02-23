@@ -19,7 +19,7 @@ public class Server {
         GameDAO games = new MemoryGameDAO();
 
         Spark.delete("/db", (Request req, Response res) -> ClearHandler.clear(req, res, auths, users, games));
-        Spark.post("/user", UserHandler::register);
+        Spark.post("/user", (Request req, Response res) -> UserHandler.register(req, res, auths, users));
         Spark.post("/session", UserHandler::login);
         Spark.delete("/session", UserHandler::logout);
         Spark.get("/game", GameHandler::listGames);
