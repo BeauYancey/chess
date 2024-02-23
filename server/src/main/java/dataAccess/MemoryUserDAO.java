@@ -33,4 +33,8 @@ public class MemoryUserDAO implements UserDAO {
         userDatabase.clear();
         size = 0;
     }
+
+    public ArrayList<UserData> listAll() {
+        return userDatabase;
+    }
 }
