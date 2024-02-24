@@ -20,8 +20,8 @@ public class Server {
 
         Spark.delete("/db", (Request req, Response res) -> ClearHandler.clear(req, res, auths, users, games));
         Spark.post("/user", (Request req, Response res) -> UserHandler.register(req, res, auths, users));
-        Spark.post("/session", UserHandler::login);
-        Spark.delete("/session", UserHandler::logout);
+        Spark.post("/session", (Request req, Response res) -> UserHandler.login(req, res, auths, users));
+        Spark.delete("/session", (Request req, Response res) -> UserHandler.logout(req, res, auths));
         Spark.get("/game", GameHandler::listGames);
         Spark.post("/game", GameHandler::createGame);
         Spark.put("/game", GameHandler::joinGame);

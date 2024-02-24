@@ -9,42 +9,52 @@ import requestResponse.LoginResponse;
 import requestResponse.RegisterRequest;
 import requestResponse.RegisterResponse;
 import service.exception.Exception400;
+import service.exception.Exception401;
 import service.exception.Exception403;
 
 import java.util.UUID;
 
 public class UserService {
 
-    public static RegisterResponse register(RegisterRequest request, AuthDAO auths, UserDAO users) throws Exception400, Exception403 {
+    public static RegisterResponse register(RegisterRequest request, AuthDAO authDAO, UserDAO userDAO)
+            throws Exception400, Exception403 {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new Exception400();
         }
-        if (users.getUser(request.username()) != null) {
+        if (userDAO.getUser(request.username()) != null) {
             throw new Exception403();
         }
 
-        users.addUser(new UserData(request.username(), request.password(), request.email()));
+        userDAO.addUser(new UserData(request.username(), request.password(), request.email()));
         String authToken = UUID.randomUUID().toString();
-        auths.addAuth(new AuthData(authToken, request.username()));
+        authDAO.addAuth(new AuthData(authToken, request.username()));
 
         return new RegisterResponse(authToken);
     }
 
-    public static LoginResponse login(LoginRequest request) {
-        // make sure the user exists, confirm password
-        // add information to the auth database
+    public static LoginResponse login(LoginRequest request, AuthDAO authDAO, UserDAO userDAO)
+            throws Exception400, Exception401 {
+        if (request.username() == null || request.password() == null) {
+            throw new Exception400();
+        }
+
+        UserData user = userDAO.getUser(request.username());
+        if (user == null || !user.password().equals(request.password())) {
+            throw new Exception401();
+        }
+
         String authToken = UUID.randomUUID().toString();
+        AuthData newAuth = new AuthData(authToken, request.username());
+        authDAO.addAuth(newAuth);
 
         return new LoginResponse(request.username(), authToken);
     }
 
-    public static void logout(String authToken) {
-        // check that the user exists and is logged in
-        AuthData user = verifyAuth(authToken);
-        // remove entry from auth database
-    }
+    public static void logout(String authToken, AuthDAO authDAO) throws Exception401 {
+        if (authDAO.getAuth(authToken) == null) {
+            throw new Exception401();
+        }
 
-    public static AuthData verifyAuth (String authToken) {
-        return new AuthData("authToken", "testUser");
+        authDAO.removeAuth(authToken);
     }
 }

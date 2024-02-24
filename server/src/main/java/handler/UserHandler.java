@@ -2,15 +2,10 @@ package handler;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dataAccess.AuthDAO;
-import dataAccess.UserDAO;
-import requestResponse.LoginRequest;
-import requestResponse.LoginResponse;
-import requestResponse.RegisterRequest;
-import requestResponse.RegisterResponse;
+import dataAccess.*;
+import requestResponse.*;
 import service.UserService;
-import service.exception.Exception400;
-import service.exception.Exception403;
+import service.exception.*;
 import spark.Request;
 import spark.Response;
 
@@ -18,11 +13,10 @@ public class UserHandler {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public static String register(Request req, Response res, AuthDAO auths, UserDAO users) {
-        // delegate functionality to the service
+    public static String register(Request req, Response res, AuthDAO authDAO, UserDAO userDAO) {
         RegisterRequest request = gson.fromJson(req.body(), RegisterRequest.class);
         try {
-            RegisterResponse response = UserService.register(request, auths, users);
+            RegisterResponse response = UserService.register(request, authDAO, userDAO);
             res.status(200);
             return gson.toJson(response);
         }
@@ -36,22 +30,36 @@ public class UserHandler {
         }
     }
 
-    public static String login(Request req, Response res) {
-        // delegate functionality to the service
+    public static String login(Request req, Response res, AuthDAO authDAO, UserDAO userDAO) {
         LoginRequest request = gson.fromJson(req.body(), LoginRequest.class);
-        LoginResponse response = UserService.login(request);
+        try {
+            LoginResponse response = UserService.login(request, authDAO, userDAO);
 
-        // interpret and return loginResponse
-        res.status(200);
-        return gson.toJson(response);
+            res.status(200);
+            return gson.toJson(response);
+        }
+        catch(Exception400 e) {
+            res.status(400);
+            return "{ \"message\": \"Error: bad request\" }";
+        }
+        catch(Exception401 e) {
+            res.status(403);
+            return "{ \"message\": \"unauthorized\" }";
+        }
     }
 
-    public static String logout(Request req, Response res) {
+    public static String logout(Request req, Response res, AuthDAO authDAO) {
         // delegate functionality to the service
         String auth = req.headers("authorization");
-        UserService.logout(auth);
+        try {
+            UserService.logout(auth, authDAO);
 
-        res.status(200);
-        return "{}";
+            res.status(200);
+            return "{}";
+        }
+        catch(Exception401 e) {
+            res.status(401);
+            return "{ \"message\": \"unauthorized\" }";
+        }
     }
 }
