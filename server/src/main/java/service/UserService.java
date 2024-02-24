@@ -29,7 +29,7 @@ public class UserService {
         String authToken = UUID.randomUUID().toString();
         authDAO.addAuth(new AuthData(authToken, request.username()));
 
-        return new RegisterResponse(authToken);
+        return new RegisterResponse(request.username(), authToken);
     }
 
     public static LoginResponse login(LoginRequest request, AuthDAO authDAO, UserDAO userDAO)

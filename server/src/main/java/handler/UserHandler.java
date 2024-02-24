@@ -20,11 +20,11 @@ public class UserHandler {
             res.status(200);
             return gson.toJson(response);
         }
-        catch(Exception400 e) {
+        catch (Exception400 e) {
             res.status(400);
             return "{ \"message\": \"Error: bad request\" }";
         }
-        catch(Exception403 e) {
+        catch (Exception403 e) {
             res.status(403);
             return "{ \"message\": \"Error: already taken\" }";
         }
@@ -38,13 +38,13 @@ public class UserHandler {
             res.status(200);
             return gson.toJson(response);
         }
-        catch(Exception400 e) {
+        catch (Exception400 e) {
             res.status(400);
             return "{ \"message\": \"Error: bad request\" }";
         }
-        catch(Exception401 e) {
-            res.status(403);
-            return "{ \"message\": \"unauthorized\" }";
+        catch (Exception401 e) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
         }
     }
 
@@ -57,9 +57,9 @@ public class UserHandler {
             res.status(200);
             return "{}";
         }
-        catch(Exception401 e) {
+        catch (Exception401 e) {
             res.status(401);
-            return "{ \"message\": \"unauthorized\" }";
+            return "{ \"message\": \"Error: unauthorized\" }";
         }
     }
 }

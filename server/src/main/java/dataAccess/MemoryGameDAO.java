@@ -1,6 +1,8 @@
 package dataAccess;
 
 import model.GameData;
+import service.exception.Exception400;
+import service.exception.Exception403;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +28,20 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(int gameID, String username, String color) {
+    public void joinGame(int gameID, String username, String color) throws Exception400, Exception403 {
         for (int i = 0; i < size; i++) {
             if (gameDatabase.get(i).gameID() == gameID) {
                 GameData game = gameDatabase.get(i);
                 if (color.equals("WHITE")) {
+                    if (!(game.whiteUsername() == null)) {
+                        throw new Exception403();
+                    }
                     game = game.setWhite(username);
                 }
                 else if (color.equals("BLACK")) {
+                    if (!(game.blackUsername() == null)) {
+                        throw new Exception403();
+                    }
                     game = game.setBlack(username);
                 }
                 gameDatabase.remove(i);
@@ -41,6 +49,7 @@ public class MemoryGameDAO implements GameDAO {
                 return;
             }
         }
+        throw new Exception400();
     }
 
     @Override
