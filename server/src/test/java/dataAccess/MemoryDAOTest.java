@@ -5,7 +5,6 @@ import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import spark.utils.Assert;
 
 import java.util.ArrayList;
 
@@ -96,4 +95,5 @@ public class MemoryDAOTest {
         Assertions.assertEquals(user, userDAO.getUser("test-user"));
         Assertions.assertNull(userDAO.getUser("no-user-with-this-username"));
     }
+
 }
