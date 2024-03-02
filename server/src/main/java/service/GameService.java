@@ -13,7 +13,6 @@ import java.util.List;
 
 public class GameService {
 
-    private static int nextID = 0;
     public static ListGameResponse listGames(String authToken, AuthDAO authDAO, GameDAO gameDAO) throws Exception401 {
         if (authDAO.getAuth(authToken) == null) {
             throw new Exception401();
@@ -32,11 +31,9 @@ public class GameService {
             throw new Exception401();
         }
 
-        GameData newGame = new GameData(++nextID, null, null,
-                request.gameName(), new ChessGame());
-        gameDAO.createGame(newGame);
+        int gameID = gameDAO.createGame(request.gameName(), new ChessGame());
 
-        return new CreateResponse(nextID);
+        return new CreateResponse(gameID);
     }
 
     public static void joinGame(JoinRequest request, String authToken, AuthDAO authDAO, GameDAO gameDAO)

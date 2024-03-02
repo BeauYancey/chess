@@ -1,5 +1,7 @@
-package dataAccess;
+package dataAccess.memory;
 
+import chess.ChessGame;
+import dataAccess.GameDAO;
 import model.GameData;
 import service.exception.Exception400;
 import service.exception.Exception403;
@@ -10,6 +12,7 @@ import java.util.List;
 public class MemoryGameDAO implements GameDAO {
     private ArrayList<GameData> gameDatabase;
     private int size;
+    private int nextID = 0;
 
     public MemoryGameDAO() {
         gameDatabase = new ArrayList<>();
@@ -22,9 +25,10 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void createGame(GameData gameData) {
-        gameDatabase.add(gameData);
+    public int createGame(String gameName, ChessGame game) {
+        gameDatabase.add(new GameData(++nextID, null, null, gameName, game));
         size++;
+        return nextID;
     }
 
     @Override

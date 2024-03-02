@@ -1,7 +1,9 @@
 package service;
 
 import chess.ChessGame;
-import dataAccess.*;
+import dataAccess.memory.MemoryAuthDAO;
+import dataAccess.memory.MemoryGameDAO;
+import dataAccess.memory.MemoryUserDAO;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -143,12 +145,9 @@ public class ServiceUnitTests {
 
     @Test
     public void testListGamesSuccess() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "name1", new ChessGame()));
-        gameDAO.createGame(new GameData(2, null, "black-player",
-                "name2", new ChessGame()));
-        gameDAO.createGame(new GameData(10, "white-player", null,
-                "name10", new ChessGame()));
+        gameDAO.createGame("name1", new ChessGame());
+        gameDAO.createGame("name2", new ChessGame());
+        gameDAO.createGame("name10", new ChessGame());
 
         String authToken = "test-token";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
@@ -165,12 +164,9 @@ public class ServiceUnitTests {
 
     @Test
     public void testListGame401() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "name1", new ChessGame()));
-        gameDAO.createGame(new GameData(2, null, "black-player",
-                "name2", new ChessGame()));
-        gameDAO.createGame(new GameData(10, "white-player", null,
-                "name10", new ChessGame()));
+        gameDAO.createGame("name1", new ChessGame());
+        gameDAO.createGame("name2", new ChessGame());
+        gameDAO.createGame("name10", new ChessGame());
 
         String authToken = "test-token";
         ListGameResponse res = null;
@@ -240,8 +236,7 @@ public class ServiceUnitTests {
 
     @Test
     public void testJoinGameSuccess() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "test-game", new ChessGame()));
+        gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
@@ -259,8 +254,7 @@ public class ServiceUnitTests {
 
     @Test
     public void testWatchGameSuccess() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "test-game", new ChessGame()));
+        gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
@@ -278,8 +272,7 @@ public class ServiceUnitTests {
 
     @Test
     public void testJoinGame400() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "test-game", new ChessGame()));
+        gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
@@ -297,8 +290,7 @@ public class ServiceUnitTests {
 
     @Test
     public void testJoinGame401() {
-        gameDAO.createGame(new GameData(1, null, null,
-                "test-game", new ChessGame()));
+        gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
 
@@ -315,8 +307,7 @@ public class ServiceUnitTests {
 
     @Test
     public void testJoinGame403() {
-        gameDAO.createGame(new GameData(1, "already-taken", null,
-                "test-game", new ChessGame()));
+        gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
@@ -324,6 +315,7 @@ public class ServiceUnitTests {
         JoinRequest req = new JoinRequest("WHITE", 1);
 
         try {
+            GameService.joinGame(req, authToken, authDAO, gameDAO);
             GameService.joinGame(req, authToken, authDAO, gameDAO);
             Assertions.fail();
         }
@@ -341,10 +333,8 @@ public class ServiceUnitTests {
         authDAO.addAuth(new AuthData("token1", "user1"));
         authDAO.addAuth(new AuthData("token2", "user2"));
 
-        gameDAO.createGame(new GameData(1, "user1", null,
-                "game1", new ChessGame()));
-        gameDAO.createGame(new GameData(2, null, "user2",
-                "game2", new ChessGame()));
+        gameDAO.createGame("game1", new ChessGame());
+        gameDAO.createGame("game2", new ChessGame());
 
         try {
             ClearService.clear(authDAO, userDAO, gameDAO);

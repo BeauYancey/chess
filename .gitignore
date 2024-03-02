@@ -1,3 +1,5 @@
+server/src/main/resources/db.properties
+
 ### Maven
 target
 
