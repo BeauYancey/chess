@@ -10,8 +10,15 @@ public class DataAccessTests {
 
     @Test
     public void getTestUser() {
-        UserData user =  userDAO.getUser("test-user");
+        UserData user = null;
+        try {
+            user = userDAO.getUser("test-user");
+        }
+        catch (DataAccessException ex) {
+            Assertions.fail();
+        }
         Assertions.assertNotNull(user);
-        Assertions.assertEquals(user.username(), "test-user");
+        Assertions.assertEquals(user.password(), "test-pass");
+        Assertions.assertEquals(user.email(), "test-email");
     }
 }

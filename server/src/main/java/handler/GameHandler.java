@@ -28,6 +28,10 @@ public class GameHandler {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
         }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
+        }
     }
 
     public static String createGame(Request req, Response res, AuthDAO authDAO, GameDAO gameDAO) {
@@ -47,6 +51,10 @@ public class GameHandler {
         catch (Exception401 e) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
+        }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 
@@ -70,6 +78,10 @@ public class GameHandler {
         catch (Exception403 e) {
             res.status(403);
             return "{ \"message\": \"Error: already taken\" }";
+        }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 }

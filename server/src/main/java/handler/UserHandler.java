@@ -28,6 +28,10 @@ public class UserHandler {
             res.status(403);
             return "{ \"message\": \"Error: already taken\" }";
         }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
+        }
     }
 
     public static String login(Request req, Response res, AuthDAO authDAO, UserDAO userDAO) {
@@ -46,6 +50,10 @@ public class UserHandler {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
         }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
+        }
     }
 
     public static String logout(Request req, Response res, AuthDAO authDAO) {
@@ -60,6 +68,10 @@ public class UserHandler {
         catch (Exception401 e) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
+        }
+        catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 }

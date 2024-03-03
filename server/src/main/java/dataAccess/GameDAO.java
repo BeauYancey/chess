@@ -8,8 +8,8 @@ import service.exception.Exception403;
 import java.util.List;
 
 public interface GameDAO {
-    List<GameData> listAll();
-    int createGame(String gameName, ChessGame game);
-    void joinGame(int gameID, String username, String color) throws Exception403, Exception400;
-    void removeAll();
+    List<GameData> listAll() throws DataAccessException;
+    int createGame(String gameName, ChessGame game) throws DataAccessException;
+    void joinGame(int gameID, String username, String color) throws Exception403, Exception400, DataAccessException;
+    void removeAll() throws DataAccessException;
 }

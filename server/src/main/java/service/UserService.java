@@ -1,6 +1,7 @@
 package service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class UserService {
 
     public static RegisterResponse register(RegisterRequest request, AuthDAO authDAO, UserDAO userDAO)
-            throws Exception400, Exception403 {
+            throws Exception400, Exception403, DataAccessException {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new Exception400();
         }
@@ -33,7 +34,7 @@ public class UserService {
     }
 
     public static LoginResponse login(LoginRequest request, AuthDAO authDAO, UserDAO userDAO)
-            throws Exception400, Exception401 {
+            throws Exception400, Exception401, DataAccessException {
         if (request.username() == null || request.password() == null) {
             throw new Exception400();
         }
@@ -50,7 +51,7 @@ public class UserService {
         return new LoginResponse(request.username(), authToken);
     }
 
-    public static void logout(String authToken, AuthDAO authDAO) throws Exception401 {
+    public static void logout(String authToken, AuthDAO authDAO) throws Exception401, DataAccessException {
         if (authDAO.getAuth(authToken) == null) {
             throw new Exception401();
         }

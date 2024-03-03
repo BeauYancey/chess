@@ -13,7 +13,8 @@ import java.util.List;
 
 public class GameService {
 
-    public static ListGameResponse listGames(String authToken, AuthDAO authDAO, GameDAO gameDAO) throws Exception401 {
+    public static ListGameResponse listGames(String authToken, AuthDAO authDAO, GameDAO gameDAO)
+            throws Exception401, DataAccessException {
         if (authDAO.getAuth(authToken) == null) {
             throw new Exception401();
         }
@@ -23,7 +24,7 @@ public class GameService {
     }
 
     public static CreateResponse createGame(CreateRequest request, String authToken, AuthDAO authDAO, GameDAO gameDAO)
-            throws Exception400, Exception401 {
+            throws Exception400, Exception401, DataAccessException {
         if (request.gameName() == null) {
             throw new Exception400();
         }
@@ -37,7 +38,7 @@ public class GameService {
     }
 
     public static void joinGame(JoinRequest request, String authToken, AuthDAO authDAO, GameDAO gameDAO)
-            throws Exception400, Exception401, Exception403 {
+            throws Exception400, Exception401, Exception403, DataAccessException {
         if (request.gameID() == 0) {
             throw new Exception400();
         }
