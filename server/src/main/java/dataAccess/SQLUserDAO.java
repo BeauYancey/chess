@@ -4,26 +4,28 @@ import dataAccess.DatabaseManager;
 import dataAccess.UserDAO;
 import model.UserData;
 
+import java.sql.SQLException;
+
 public class SQLUserDAO implements UserDAO {
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
         String query = String.format("SELECT username, password, email FROM users WHERE username='%s'", username);
-        String password;
-        String email;
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(query)) {
                 var rs = preparedStatement.executeQuery();
-                rs.next();
-
-                password = rs.getString(2);
-                email = rs.getString(3);
+                if (rs.next()) {
+                    String password = rs.getString(2);
+                    String email = rs.getString(3);
+                    return new UserData(username, password, email);
+                }
+                else {
+                    return null;
+                }
             }
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
         }
-        catch (Exception ex) {
-            return null;
-        }
-        return new UserData(username, password, email);
     }
 
     @Override
