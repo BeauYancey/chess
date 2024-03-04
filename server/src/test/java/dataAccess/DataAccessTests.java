@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class DataAccessTests {
 
@@ -132,5 +133,14 @@ public class DataAccessTests {
         Assertions.assertNotEquals(0, gameID);
         Assertions.assertNotEquals(0, gameID2);
         Assertions.assertNotEquals(gameID2, gameID, "games created with the same name return the same ID");
+    }
+
+    @Test
+    public void listGamesTest() throws DataAccessException {
+        gameDAO.createGame("test-game-1", new ChessGame());
+        gameDAO.createGame("test-game-2", new ChessGame());
+        gameDAO.createGame("test-game-3", new ChessGame());
+
+        Assertions.assertEquals(3, gameDAO.listAll().size());
     }
 }

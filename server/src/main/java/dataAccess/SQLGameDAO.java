@@ -9,12 +9,36 @@ import service.exception.Exception403;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SQLGameDAO implements GameDAO {
     @Override
-    public List<GameData> listAll() {
-        return null;
+    public List<GameData> listAll() throws DataAccessException {
+        ArrayList<GameData> gameList = new ArrayList<>();
+        String query = "SELECT id, white_username, black_username, name, game FROM games";
+        Gson gson = new Gson();
+
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(query)) {
+                var rs = preparedStatement.executeQuery();
+
+                while (rs.next()) {
+                    int id = rs.getInt(1);
+                    String white = rs.getString(2);
+                    String black = rs.getString(3);
+                    String name = rs.getString(4);
+                    ChessGame game = gson.fromJson(rs.getString(5), ChessGame.class);
+
+                    gameList.add(new GameData(id, white, black, name, game));
+                }
+
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+        return gameList;
     }
 
     @Override
