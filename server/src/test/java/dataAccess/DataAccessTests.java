@@ -1,17 +1,39 @@
 package dataAccess;
 
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
+
 public class DataAccessTests {
 
     UserDAO userDAO = new SQLUserDAO();
+    AuthDAO authDAO = new SQLAuthDAO();
+    GameDAO gameDAO = new SQLGameDAO();
 
     @BeforeEach
     public void reset() throws DataAccessException{
         userDAO.removeAll();
+        authDAO.removeAll();
+        gameDAO.removeAll();
+
+        // Set up databases with data used for the tests
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO users (username, password, email) " +
+                    "values ('test-user', 'test-pass', 'test-email')")) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (username, token) " +
+                    "values ('test-user', 'test-token')")) {
+                preparedStatement.executeUpdate();
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
     }
 
     @Test
@@ -44,11 +66,24 @@ public class DataAccessTests {
     }
 
     @Test
-    public void removeAllTest() {
+    public void removeAllUsersTest() {
         try {
             userDAO.removeAll();
             UserData testUser = userDAO.getUser("test-user");
             Assertions.assertNull(testUser);
+        }
+        catch (DataAccessException ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void getAuthTest() {
+        try {
+            AuthData auth = authDAO.getAuth("test-token");
+            Assertions.assertNotNull(auth);
+            Assertions.assertEquals(auth.userName(), "test-user");
+            Assertions.assertEquals(auth.authToken(), "test-token");
         }
         catch (DataAccessException ex) {
             Assertions.fail();
