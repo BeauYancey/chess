@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 public class DataAccessTests {
@@ -84,6 +85,55 @@ public class DataAccessTests {
             Assertions.assertNotNull(auth);
             Assertions.assertEquals(auth.userName(), "test-user");
             Assertions.assertEquals(auth.authToken(), "test-token");
+        }
+        catch (DataAccessException ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void addAuthTest() {
+        try {
+            AuthData auth = new AuthData("test-token-2", "test-user-2");
+            authDAO.addAuth(auth);
+
+            AuthData result = authDAO.getAuth("test-token-2");
+            Assertions.assertEquals(auth, result);
+        }
+        catch (DataAccessException ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void removeAuthTest() {
+        try {
+            authDAO.removeAuth("test-token");
+            AuthData auth = authDAO.getAuth("test-token");
+            Assertions.assertNull(auth);
+        }
+        catch (DataAccessException ex) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void removeAllAuthsTest() {
+        try {
+            authDAO.addAuth(new AuthData("token2", "user2"));
+            authDAO.addAuth(new AuthData("token3", "user3"));
+            authDAO.addAuth(new AuthData("token4", "user4"));
+
+            authDAO.removeAll();
+
+            AuthData auth = authDAO.getAuth("test-token");
+            Assertions.assertNull(auth);
+            auth = authDAO.getAuth("token2");
+            Assertions.assertNull(auth);
+            auth = authDAO.getAuth("token3");
+            Assertions.assertNull(auth);
+            auth = authDAO.getAuth("token4");
+            Assertions.assertNull(auth);
         }
         catch (DataAccessException ex) {
             Assertions.fail();

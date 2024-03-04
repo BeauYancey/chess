@@ -6,8 +6,22 @@ import java.sql.SQLException;
 
 public class SQLAuthDAO implements AuthDAO {
     @Override
-    public void addAuth(AuthData authData) {
+    public void addAuth(AuthData authData) throws DataAccessException {
+        String statement = "INSERT INTO auth (token, username) values (?, ?)";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, authData.authToken());
+                preparedStatement.setString(2, authData.userName());
 
+                int rowsAffected = preparedStatement.executeUpdate();
+                if (rowsAffected != 1) {
+                    throw new DataAccessException("SQL: Adding new auth affected " + rowsAffected + " rows");
+                }
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
     }
 
     @Override
@@ -34,12 +48,32 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void removeAuth(String authToken) {
+    public void removeAuth(String authToken) throws DataAccessException {
+        String statement = "DELETE FROM auth WHERE token=?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
 
+                int rowsAffected = preparedStatement.executeUpdate();
+                if (rowsAffected != 1) {
+                    throw new DataAccessException("SQL: removing auth affected " + rowsAffected + " rows");
+                }
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
     }
 
     @Override
-    public void removeAll() {
-
+    public void removeAll() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM auth")) {
+                preparedStatement.executeUpdate();
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
     }
 }

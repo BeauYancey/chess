@@ -48,9 +48,8 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void removeAll() throws DataAccessException {
-        String statement = "DELETE FROM users";
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(statement)) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM users")) {
                 preparedStatement.executeUpdate();
             }
         }
