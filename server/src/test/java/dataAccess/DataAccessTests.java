@@ -8,9 +8,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.exception.Exception400;
+import service.exception.Exception403;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class DataAccessTests {
 
@@ -142,5 +143,46 @@ public class DataAccessTests {
         gameDAO.createGame("test-game-3", new ChessGame());
 
         Assertions.assertEquals(3, gameDAO.listAll().size());
+    }
+
+    @Test
+    public void joinGameTest() throws DataAccessException, Exception403, Exception400 {
+        int id = gameDAO.createGame("test-game", new ChessGame());
+        gameDAO.joinGame(id, "test-user", "white");
+
+        Assertions.assertEquals(1, gameDAO.listAll().size());
+        GameData gameData = gameDAO.listAll().getFirst();
+        Assertions.assertEquals("test-user", gameData.whiteUsername());
+        Assertions.assertNull(gameData.blackUsername());
+    }
+
+    @Test
+    public void joinGame403() throws DataAccessException, Exception400 {
+        try {
+            int id = gameDAO.createGame("test-game", new ChessGame());
+            gameDAO.joinGame(id, "test-user", "white");
+            gameDAO.joinGame(id, "test-user-2", "white");
+            Assertions.fail();
+        }
+        catch (Exception403 ex) {
+            Assertions.assertEquals(1, gameDAO.listAll().size());
+            GameData gameData = gameDAO.listAll().getFirst();
+            Assertions.assertEquals("test-user", gameData.whiteUsername());
+            Assertions.assertNull(gameData.blackUsername());
+        }
+    }
+    @Test
+    public void joinGame400() throws DataAccessException, Exception403 {
+        try {
+            int id = gameDAO.createGame("test-game", new ChessGame());
+            gameDAO.joinGame(id-1, "test-user", "white");
+            Assertions.fail();
+        }
+        catch (Exception400 ex) {
+            Assertions.assertEquals(1, gameDAO.listAll().size());
+            GameData gameData = gameDAO.listAll().getFirst();
+            Assertions.assertNull(gameData.whiteUsername());
+            Assertions.assertNull(gameData.blackUsername());
+        }
     }
 }

@@ -70,8 +70,36 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(int gameID, String username, String color) throws Exception403, Exception400 {
+    public void joinGame(int gameID, String username, String color) throws DataAccessException, Exception403, Exception400 {
+        String field = color.toLowerCase() + "_username";
+        String query = String.format("SELECT %s FROM games WHERE id = ?", field);
+        String statement = String.format("UPDATE games SET %s = ? WHERE id = ?", field);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(query)) {
+                preparedStatement.setInt(1, gameID);
+                var rs = preparedStatement.executeQuery();
+                if (rs.next()) {
+                    if (rs.getString(1) != null) {
+                        throw new Exception403();
+                    }
+                }
+                else {
+                    throw new Exception400();
+                }
+            }
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, username);
+                preparedStatement.setInt(2, gameID);
 
+                int rowsAffected = preparedStatement.executeUpdate();
+                if (rowsAffected != 1) {
+                    throw new DataAccessException("SQL: joining game affected " + rowsAffected + " rows");
+                }
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
     }
 
     @Override
