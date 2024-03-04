@@ -16,7 +16,7 @@ public class DataAccessTests {
     GameDAO gameDAO = new SQLGameDAO();
 
     @BeforeEach
-    public void reset() throws DataAccessException{
+    public void reset() throws DataAccessException {
         userDAO.removeAll();
         authDAO.removeAll();
         gameDAO.removeAll();
@@ -38,105 +38,70 @@ public class DataAccessTests {
     }
 
     @Test
-    public void getUserTest() {
-        try {
-            UserData user = userDAO.getUser("test-user");
-            Assertions.assertNotNull(user);
-            Assertions.assertEquals(user.password(), "test-pass");
-            Assertions.assertEquals(user.email(), "test-email");
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+    public void getUserTest() throws DataAccessException {
+        UserData user = userDAO.getUser("test-user");
+        Assertions.assertNotNull(user);
+        Assertions.assertEquals(user.password(), "test-pass");
+        Assertions.assertEquals(user.email(), "test-email");
     }
 
     @Test
-    public void addUserTest() {
-        try {
-            UserData newUser = new UserData("test-user-2", "test-pass-2", "test-email-2");
-            userDAO.addUser(newUser);
+    public void addUserTest() throws DataAccessException {
+        UserData newUser = new UserData("test-user-2", "test-pass-2", "test-email-2");
+        userDAO.addUser(newUser);
 
-            UserData result = userDAO.getUser("test-user-2");
-            Assertions.assertNotNull(result);
-            Assertions.assertEquals(result.password(), "test-pass-2");
-            Assertions.assertEquals(result.email(), "test-email-2");
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+        UserData result = userDAO.getUser("test-user-2");
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(result.password(), "test-pass-2");
+        Assertions.assertEquals(result.email(), "test-email-2");
     }
 
     @Test
-    public void removeAllUsersTest() {
-        try {
-            userDAO.removeAll();
-            UserData testUser = userDAO.getUser("test-user");
-            Assertions.assertNull(testUser);
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+    public void removeAllUsersTest() throws DataAccessException {
+        userDAO.removeAll();
+        UserData testUser = userDAO.getUser("test-user");
+        Assertions.assertNull(testUser);
     }
 
     @Test
-    public void getAuthTest() {
-        try {
-            AuthData auth = authDAO.getAuth("test-token");
-            Assertions.assertNotNull(auth);
-            Assertions.assertEquals(auth.userName(), "test-user");
-            Assertions.assertEquals(auth.authToken(), "test-token");
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+    public void getAuthTest() throws DataAccessException {
+        AuthData auth = authDAO.getAuth("test-token");
+        Assertions.assertNotNull(auth);
+        Assertions.assertEquals(auth.userName(), "test-user");
+        Assertions.assertEquals(auth.authToken(), "test-token");
     }
 
     @Test
-    public void addAuthTest() {
-        try {
-            AuthData auth = new AuthData("test-token-2", "test-user-2");
-            authDAO.addAuth(auth);
+    public void addAuthTest() throws DataAccessException {
+        AuthData auth = new AuthData("test-token-2", "test-user-2");
+        authDAO.addAuth(auth);
 
-            AuthData result = authDAO.getAuth("test-token-2");
-            Assertions.assertEquals(auth, result);
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+        AuthData result = authDAO.getAuth("test-token-2");
+        Assertions.assertEquals(auth, result);
     }
 
     @Test
-    public void removeAuthTest() {
-        try {
-            authDAO.removeAuth("test-token");
-            AuthData auth = authDAO.getAuth("test-token");
-            Assertions.assertNull(auth);
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+    public void removeAuthTest() throws DataAccessException {
+        authDAO.removeAuth("test-token");
+        AuthData auth = authDAO.getAuth("test-token");
+        Assertions.assertNull(auth);
     }
 
     @Test
-    public void removeAllAuthsTest() {
-        try {
-            authDAO.addAuth(new AuthData("token2", "user2"));
-            authDAO.addAuth(new AuthData("token3", "user3"));
-            authDAO.addAuth(new AuthData("token4", "user4"));
+    public void removeAllAuthsTest() throws DataAccessException {
+        authDAO.addAuth(new AuthData("token2", "user2"));
+        authDAO.addAuth(new AuthData("token3", "user3"));
+        authDAO.addAuth(new AuthData("token4", "user4"));
 
-            authDAO.removeAll();
+        authDAO.removeAll();
 
-            AuthData auth = authDAO.getAuth("test-token");
-            Assertions.assertNull(auth);
-            auth = authDAO.getAuth("token2");
-            Assertions.assertNull(auth);
-            auth = authDAO.getAuth("token3");
-            Assertions.assertNull(auth);
-            auth = authDAO.getAuth("token4");
-            Assertions.assertNull(auth);
-        }
-        catch (DataAccessException ex) {
-            Assertions.fail();
-        }
+        AuthData auth = authDAO.getAuth("test-token");
+        Assertions.assertNull(auth);
+        auth = authDAO.getAuth("token2");
+        Assertions.assertNull(auth);
+        auth = authDAO.getAuth("token3");
+        Assertions.assertNull(auth);
+        auth = authDAO.getAuth("token4");
+        Assertions.assertNull(auth);
     }
 }
