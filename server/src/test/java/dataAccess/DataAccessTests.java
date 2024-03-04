@@ -1,12 +1,14 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 public class DataAccessTests {
@@ -29,6 +31,24 @@ public class DataAccessTests {
             }
             try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (username, token) " +
                     "values ('test-user', 'test-token')")) {
+                preparedStatement.executeUpdate();
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
+
+    @AfterAll
+    public static void cleanup() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM auth")) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM users")) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM games")) {
                 preparedStatement.executeUpdate();
             }
         }
@@ -103,5 +123,14 @@ public class DataAccessTests {
         Assertions.assertNull(auth);
         auth = authDAO.getAuth("token4");
         Assertions.assertNull(auth);
+    }
+
+    @Test
+    public void createGameTest() throws DataAccessException {
+        int gameID = gameDAO.createGame("test-game-name", new ChessGame());
+        int gameID2 = gameDAO.createGame("test-game-name", new ChessGame());
+        Assertions.assertNotEquals(0, gameID);
+        Assertions.assertNotEquals(0, gameID2);
+        Assertions.assertNotEquals(gameID2, gameID, "games created with the same name return the same ID");
     }
 }
