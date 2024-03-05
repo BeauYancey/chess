@@ -1,9 +1,8 @@
 package service;
 
 import chess.ChessGame;
-import dataAccess.memory.MemoryAuthDAO;
-import dataAccess.memory.MemoryGameDAO;
-import dataAccess.memory.MemoryUserDAO;
+import dataAccess.*;
+import dataAccess.memory.*;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,15 +13,15 @@ import service.exception.*;
 import java.util.ArrayList;
 
 public class ServiceUnitTests {
-    MemoryAuthDAO authDAO;
-    MemoryUserDAO userDAO;
-    MemoryGameDAO gameDAO;
+    AuthDAO authDAO = new SQLAuthDAO();
+    UserDAO userDAO = new SQLUserDAO();
+    GameDAO gameDAO = new SQLGameDAO();
 
     @BeforeEach
-    public void setup() {
-        authDAO = new MemoryAuthDAO();
-        userDAO = new MemoryUserDAO();
-        gameDAO = new MemoryGameDAO();
+    public void setup() throws DataAccessException {
+        authDAO.removeAll();
+        userDAO.removeAll();
+        gameDAO.removeAll();
     }
 
     @Test
@@ -144,7 +143,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testListGamesSuccess() {
+    public void testListGamesSuccess() throws DataAccessException{
         gameDAO.createGame("name1", new ChessGame());
         gameDAO.createGame("name2", new ChessGame());
         gameDAO.createGame("name10", new ChessGame());
@@ -163,7 +162,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testListGame401() {
+    public void testListGame401() throws DataAccessException{
         gameDAO.createGame("name1", new ChessGame());
         gameDAO.createGame("name2", new ChessGame());
         gameDAO.createGame("name10", new ChessGame());
@@ -181,7 +180,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testCreateGameSuccess() {
+    public void testCreateGameSuccess() throws DataAccessException{
         String authToken = "test-token";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
 
@@ -203,7 +202,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testCreateGame400() {
+    public void testCreateGame400() throws DataAccessException{
         String authToken = "test-token";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
 
@@ -235,13 +234,13 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testJoinGameSuccess() {
-        gameDAO.createGame("test-game", new ChessGame());
+    public void testJoinGameSuccess() throws DataAccessException{
+        int id = gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
 
-        JoinRequest req = new JoinRequest("WHITE", 1);
+        JoinRequest req = new JoinRequest("WHITE", id);
 
         try {
             GameService.joinGame(req, authToken, authDAO, gameDAO);
@@ -253,7 +252,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testWatchGameSuccess() {
+    public void testWatchGameSuccess() throws DataAccessException{
         gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
@@ -271,7 +270,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testJoinGame400() {
+    public void testJoinGame400() throws DataAccessException{
         gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
@@ -289,7 +288,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testJoinGame401() {
+    public void testJoinGame401() throws DataAccessException {
         gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
@@ -306,13 +305,13 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testJoinGame403() {
-        gameDAO.createGame("test-game", new ChessGame());
+    public void testJoinGame403() throws DataAccessException{
+        int id = gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
 
-        JoinRequest req = new JoinRequest("WHITE", 1);
+        JoinRequest req = new JoinRequest("WHITE", id);
 
         try {
             GameService.joinGame(req, authToken, authDAO, gameDAO);
@@ -325,7 +324,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testClear() {
+    public void testClear() throws DataAccessException{
         userDAO.addUser(new UserData("user1", "pass1", "1@mail.com"));
         userDAO.addUser(new UserData("user2", "pass2", "2@mail.com"));
         userDAO.addUser(new UserData("user3", "pass3", "3@mail.com"));
@@ -344,7 +343,10 @@ public class ServiceUnitTests {
         }
 
         Assertions.assertEquals(gameDAO.listAll(), new ArrayList<GameData>());
-        Assertions.assertEquals(userDAO.listAll(), new ArrayList<UserData>());
-        Assertions.assertEquals(authDAO.listAll(), new ArrayList<AuthData>());
+        Assertions.assertNull(authDAO.getAuth("token1"));
+        Assertions.assertNull(authDAO.getAuth("token2"));
+        Assertions.assertNull(userDAO.getUser("user1"));
+        Assertions.assertNull(userDAO.getUser("user2"));
+        Assertions.assertNull(userDAO.getUser("user3"));
     }
 }
