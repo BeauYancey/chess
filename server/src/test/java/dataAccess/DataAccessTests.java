@@ -68,6 +68,12 @@ public class DataAccessTests {
     }
 
     @Test
+    public void getUserFail() throws DataAccessException {
+        UserData user = userDAO.getUser("no-user");
+        Assertions.assertNull(user);
+    }
+
+    @Test
     public void addUserTest() throws DataAccessException {
         UserData newUser = new UserData("test-user-2", "test-pass-2", "test-email-2");
         userDAO.addUser(newUser);
@@ -76,6 +82,18 @@ public class DataAccessTests {
         Assertions.assertNotNull(result);
         Assertions.assertEquals(result.password(), "test-pass-2");
         Assertions.assertEquals(result.email(), "test-email-2");
+    }
+
+    @Test
+    public void addUserFail() {
+        try {
+            UserData newUser = new UserData(null, null, null);
+            userDAO.addUser(newUser);
+            Assertions.fail();
+        }
+        catch (DataAccessException ex) {
+            Assertions.assertTrue(ex.getMessage().contains("null"));
+        }
     }
 
     @Test
@@ -94,6 +112,12 @@ public class DataAccessTests {
     }
 
     @Test
+    public void getAuthFail() throws DataAccessException {
+        AuthData auth = authDAO.getAuth("no-token");
+        Assertions.assertNull(auth);
+    }
+
+    @Test
     public void addAuthTest() throws DataAccessException {
         AuthData auth = new AuthData("test-token-2", "test-user-2");
         authDAO.addAuth(auth);
@@ -103,10 +127,33 @@ public class DataAccessTests {
     }
 
     @Test
+    public void addAuthFail() {
+        try {
+            AuthData auth = new AuthData(null, null);
+            authDAO.addAuth(auth);
+            Assertions.fail();
+        }
+        catch (DataAccessException ex) {
+            Assertions.assertTrue(ex.getMessage().contains("null"));
+        }
+    }
+
+    @Test
     public void removeAuthTest() throws DataAccessException {
         authDAO.removeAuth("test-token");
         AuthData auth = authDAO.getAuth("test-token");
         Assertions.assertNull(auth);
+    }
+
+    @Test
+    public void removeAuthFail() {
+        try {
+            authDAO.removeAuth("no-token");
+            Assertions.fail();
+        }
+        catch (DataAccessException ex) {
+            Assertions.assertTrue(ex.getMessage().contains("affected 0 rows"));
+        }
     }
 
     @Test
@@ -134,6 +181,17 @@ public class DataAccessTests {
         Assertions.assertNotEquals(0, gameID);
         Assertions.assertNotEquals(0, gameID2);
         Assertions.assertNotEquals(gameID2, gameID, "games created with the same name return the same ID");
+    }
+
+    @Test
+    public void createGameFail() {
+        try {
+            int gameID = gameDAO.createGame(null, null);
+            Assertions.fail();
+        }
+        catch (DataAccessException ex) {
+            Assertions.assertTrue(ex.getMessage().contains("null"));
+        }
     }
 
     @Test

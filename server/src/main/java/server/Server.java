@@ -17,9 +17,9 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        AuthDAO auths = new MemoryAuthDAO();
-        UserDAO users = new MemoryUserDAO();
-        GameDAO games = new MemoryGameDAO();
+        AuthDAO auths = new SQLAuthDAO();
+        UserDAO users = new SQLUserDAO();
+        GameDAO games = new SQLGameDAO();
 
         Spark.delete("/db", (Request req, Response res) -> ClearHandler.clear(req, res, auths, users, games));
         Spark.post("/user", (Request req, Response res) -> UserHandler.register(req, res, auths, users));

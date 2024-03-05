@@ -15,7 +15,7 @@ import java.util.List;
 public class SQLGameDAO implements GameDAO {
     @Override
     public List<GameData> listAll() throws DataAccessException {
-        ArrayList<GameData> gameList = new ArrayList<>();
+        List<GameData> gameList = new ArrayList<>();
         String query = "SELECT id, white_username, black_username, name, game FROM games";
         Gson gson = new Gson();
 
