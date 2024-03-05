@@ -1,4 +1,4 @@
-package service;
+package serviceTests;
 
 import chess.ChessGame;
 import dataAccess.*;
@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requestResponse.*;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
 import service.exception.*;
 
 import java.util.ArrayList;

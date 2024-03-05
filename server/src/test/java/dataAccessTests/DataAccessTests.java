@@ -1,15 +1,13 @@
-package dataAccess;
+package dataAccessTests;
 
 import chess.ChessGame;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
+import dataAccess.*;
+import model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.exception.Exception400;
-import service.exception.Exception403;
+import service.exception.*;
 
 import java.sql.SQLException;
 
