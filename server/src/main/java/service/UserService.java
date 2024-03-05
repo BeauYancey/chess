@@ -5,6 +5,7 @@ import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import requestResponse.LoginRequest;
 import requestResponse.LoginResponse;
 import requestResponse.RegisterRequest;
@@ -26,7 +27,10 @@ public class UserService {
             throw new Exception403();
         }
 
-        userDAO.addUser(new UserData(request.username(), request.password(), request.email()));
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(request.password());
+
+        userDAO.addUser(new UserData(request.username(), hashedPassword, request.email()));
         String authToken = UUID.randomUUID().toString();
         authDAO.addAuth(new AuthData(authToken, request.username()));
 
@@ -40,7 +44,8 @@ public class UserService {
         }
 
         UserData user = userDAO.getUser(request.username());
-        if (user == null || !user.password().equals(request.password())) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        if (user == null || !encoder.matches(request.password(), user.password())) {
             throw new Exception401();
         }
 
