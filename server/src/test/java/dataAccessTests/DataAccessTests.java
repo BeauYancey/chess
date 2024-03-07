@@ -105,6 +105,17 @@ public class DataAccessTests {
     }
 
     @Test
+    public void removeAllUsersEmpty() throws DataAccessException {
+        userDAO.removeAll();
+        UserData testUser = userDAO.getUser("test-user");
+        Assertions.assertNull(testUser);
+        
+        userDAO.removeAll();
+        testUser = userDAO.getUser("test-user");
+        Assertions.assertNull(testUser);
+    }
+
+    @Test
     public void getAuthTest() throws DataAccessException {
         AuthData auth = authDAO.getAuth("test-token");
         Assertions.assertNotNull(auth);
@@ -202,6 +213,12 @@ public class DataAccessTests {
         gameDAO.createGame("test-game-3", new ChessGame());
 
         Assertions.assertEquals(3, gameDAO.listAll().size());
+    }
+
+    @Test
+    public void listNoGamesTest() throws DataAccessException {
+        gameDAO.removeAll();
+        Assertions.assertEquals(0, gameDAO.listAll().size());
     }
 
     @Test
