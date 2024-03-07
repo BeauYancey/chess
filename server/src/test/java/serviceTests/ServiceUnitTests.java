@@ -20,6 +20,9 @@ public class ServiceUnitTests {
     UserDAO userDAO = new SQLUserDAO();
     GameDAO gameDAO = new SQLGameDAO();
 
+    public ServiceUnitTests() throws DataAccessException {
+    }
+
     @BeforeEach
     public void setup() throws DataAccessException {
         authDAO.removeAll();

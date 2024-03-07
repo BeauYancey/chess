@@ -2,9 +2,26 @@ package dataAccess;
 
 import model.UserData;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO {
+
+    public SQLUserDAO() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        String statement = "CREATE TABLE IF NOT EXISTS users" +
+                "( username varchar(36) not null, " +
+                "password varchar(72) not null, " +
+                "email varchar(36) not null)";
+
+        Connection conn = DatabaseManager.getConnection();
+        try (var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {

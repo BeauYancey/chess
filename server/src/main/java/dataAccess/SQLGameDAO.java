@@ -6,6 +6,7 @@ import model.GameData;
 import service.exception.Exception400;
 import service.exception.Exception403;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SQLGameDAO implements GameDAO {
+
+    public SQLGameDAO() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        String statement = "CREATE TABLE IF NOT EXISTS games" +
+                "( id integer not null primary key auto_increment, " +
+                "white_username varchar(36), " +
+                "black_username varchar(36), " +
+                "name varchar(36) not null, " +
+                "game blob not null )";
+
+        Connection conn = DatabaseManager.getConnection();
+        try (var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
+
     @Override
     public List<GameData> listAll() throws DataAccessException {
         List<GameData> gameList = new ArrayList<>();

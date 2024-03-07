@@ -2,9 +2,26 @@ package dataAccess;
 
 import model.AuthData;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SQLAuthDAO implements AuthDAO {
+
+    public SQLAuthDAO() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        String statement = "CREATE TABLE IF NOT EXISTS auth" +
+                "( token varchar(36) not null, " +
+                "username varchar(36) not null)";
+
+        Connection conn = DatabaseManager.getConnection();
+        try (var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
+
     @Override
     public void addAuth(AuthData authData) throws DataAccessException {
         String statement = "INSERT INTO auth (token, username) values (?, ?)";

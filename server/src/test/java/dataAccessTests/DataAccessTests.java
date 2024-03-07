@@ -17,6 +17,9 @@ public class DataAccessTests {
     AuthDAO authDAO = new SQLAuthDAO();
     GameDAO gameDAO = new SQLGameDAO();
 
+    public DataAccessTests() throws DataAccessException {
+    }
+
     @BeforeEach
     public void reset() throws DataAccessException {
         userDAO.removeAll();
