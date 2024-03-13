@@ -1,85 +1,57 @@
 package ui;
 
-import java.util.Scanner;
-
-import static ui.EscapeSequences.*;
-
 public class Client {
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
-        boolean loggedIn = false;
+    private final String serverURL;
+    private final Repl repl;
+    private State state = State.LOGGEDOUT;
 
-        printMenu(loggedIn);
+    public Client(String serverURL, Repl repl) {
+        this.serverURL = serverURL;
+        this.repl = repl;
+    }
 
-        while (true) {
-            printPrompt();
-            String input = scanner.nextLine().toLowerCase();
-            if (!loggedIn) {
-                if (input.equals("register") || input.equals("1")) {
-                    loggedIn = true;
-                }
-                else if (input.equals("login") || input.equals("2")) {
-                    loggedIn = true;
-                }
-                else if (input.equals("help") || input.equals("3")) {
-                    printHelp(loggedIn);
-                }
-                else if (input.equals("quit") || input.equals("4")) {
-                    break;
-                }
-                else {
-                    printUnrecognizedCmd(loggedIn);
-                }
-
-            }
-            else {
-                if (input.equals("help") || input.equals("5")) {
-                    printHelp(loggedIn);
-                }
-                else if (input.equals("logout") || input.equals("6")) {
-                    loggedIn = false;
-                }
-                else if (input.equals("quit") || input.equals("7")) {
-                    break;
-                }
-                else {
-                    System.out.println("You entered " + input);
-                }
-            }
+    public void eval(String input){
+        switch (input) {
+            case "help" -> repl.printMsg("help");
+            case "login" -> repl.printMsg("login");
+            case "register" -> repl.printMsg("register");
+            case "logout" -> repl.printMsg("logout");
+            case "create" -> repl.printMsg("create game");
+            case "list" -> repl.printMsg("list games");
+            case "join" -> repl.printMsg("join game");
+            case "observe" -> repl.printMsg("observe game");
         }
     }
 
-    private void printPrompt() {
-        System.out.print(">>> ");
+    private void help() {
+
     }
 
-    private void printMenu(boolean loggedIn) {
-        String menu;
-        if (loggedIn) {
-            menu = "\t1. Create Game\n" +
-                    "\t2. List Games\n" +
-                    "\t3. Join Game\n" +
-                    "\t4. Observe Game\n" +
-                    "\t5. Help\n" +
-                    "\t6. Logout\n" +
-                    "\t7. Quit\n";
-        }
-        else {
-            menu = "\t1. Register\n" +
-                    "\t2. Login\n" +
-                    "\t3. Help\n" +
-                    "\t4. Quit\n";
-        }
-        System.out.print(menu);
+    private void login() {
+
     }
 
-    private void printHelp(boolean loggedIn) {
-        System.out.println("Enter the number of one of the following choices");
-        printMenu(loggedIn);
+    private void register() {
+
     }
 
-    private void printUnrecognizedCmd(boolean loggedIn) {
-        System.out.println("You entered an unrecognized command.");
-        printHelp(loggedIn);
+    private void logout() {
+
+    }
+
+    private void create() {
+
+    }
+
+    private void list() {
+
+    }
+
+    private void join() {
+
+    }
+
+    private void observe() {
+        
     }
 }
