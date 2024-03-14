@@ -5,16 +5,17 @@ import static ui.EscapeSequences.*;
 
 public class Repl {
     private final Client client;
+    private final Scanner scanner;
 
     public Repl(String serverURL) {
         client = new Client(serverURL, this);
+        scanner = new Scanner(System.in);
     }
 
     public void run() {
         System.out.println(WHITE_ROOK + "WELCOME TO CS240 CHESS SERVER" + WHITE_ROOK);
         System.out.println("Sign in to start. Type 'help' to see a list of commands.");
 
-        Scanner scanner = new Scanner(System.in);
         String input;
 
         while (true) {
@@ -37,5 +38,9 @@ public class Repl {
 
     public void printErr(String msg) {
         System.out.println(SET_TEXT_COLOR_RED + msg + SET_TEXT_COLOR_WHITE);
+    }
+
+    public String scanWord() {
+        return String.join("-", scanner.nextLine().trim().split(" "));
     }
 }
