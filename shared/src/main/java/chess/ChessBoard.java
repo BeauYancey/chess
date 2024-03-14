@@ -102,34 +102,8 @@ public class ChessBoard {
                 if (piece == null) {
                     boardString += " |";
                 }
-                else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                        boardString += "\u2656|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                        boardString += "\u2658|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                        boardString += "\u2657|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                        boardString += "\u2654|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                        boardString += "\u2655|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                        boardString += "\u2659|";
-                    }
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                    if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                        boardString += "\u265c|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                        boardString += "\u265e|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                        boardString += "\u265d|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                        boardString += "\u265a|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                        boardString += "\u265b|";
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                        boardString += "\u265f|";
-                    }
+                else {
+                    boardString += piece + "|";
                 }
             }
             boardString += "\n";
