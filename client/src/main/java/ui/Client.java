@@ -3,14 +3,19 @@ package ui;
 import static ui.EscapeSequences.*;
 import chess.*;
 import chess.ChessGame.TeamColor;
+import exception.ServerException;
+import server.ServerFacade;
 
 public class Client {
     private final String serverURL;
+    private final ServerFacade serverFacade;
     private final Repl repl;
     private State state = State.LOGGEDOUT;
+    private String authToken = null;
 
     public Client(String serverURL, Repl repl) {
         this.serverURL = serverURL;
+        serverFacade = new ServerFacade(serverURL);
         this.repl = repl;
     }
 
@@ -55,6 +60,14 @@ public class Client {
             repl.printMsg("Enter your password:");
             String password = repl.scanWord();
 
+            try {
+                authToken = serverFacade.login(username, password).authToken();
+            }
+            catch (Exception ex) {
+                repl.printErr(ex.getMessage());
+                return;
+            }
+
             state = State.LOGGEDIN;
             repl.printMsg("Welcome " + username);
         }
@@ -71,6 +84,14 @@ public class Client {
             String email = repl.scanWord();
             repl.printMsg("Enter your password:");
             String password = repl.scanWord();
+
+            try {
+                authToken = serverFacade.register(username, password, email).authToken();
+            }
+            catch (Exception ex) {
+                repl.printErr(ex.getMessage());
+                return;
+            }
 
             state = State.LOGGEDIN;
             repl.printMsg("Welcome " + username);

@@ -3,12 +3,12 @@ package handler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataAccess.*;
+import exception.ServerException;
 import requestResponse.CreateRequest;
 import requestResponse.CreateResponse;
 import requestResponse.JoinRequest;
 import requestResponse.ListGameResponse;
 import service.GameService;
-import service.exception.*;
 import spark.Request;
 import spark.Response;
 

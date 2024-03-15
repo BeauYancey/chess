@@ -2,6 +2,7 @@ package dataAccessTests;
 
 import chess.ChessGame;
 import dataAccess.*;
+import exception.ServerException;
 import model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;

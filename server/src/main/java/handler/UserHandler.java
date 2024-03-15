@@ -3,9 +3,9 @@ package handler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataAccess.*;
+import exception.ServerException;
 import requestResponse.*;
 import service.UserService;
-import service.exception.*;
 import spark.Request;
 import spark.Response;
 

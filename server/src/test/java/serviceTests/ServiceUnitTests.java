@@ -2,6 +2,7 @@ package serviceTests;
 
 import chess.ChessGame;
 import dataAccess.*;
+import exception.ServerException;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

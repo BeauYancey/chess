@@ -2,8 +2,8 @@ package service;
 
 import chess.ChessGame;
 import dataAccess.*;
+import exception.ServerException;
 import model.*;
-import service.exception.*;
 import requestResponse.CreateRequest;
 import requestResponse.CreateResponse;
 import requestResponse.JoinRequest;

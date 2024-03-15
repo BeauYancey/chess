@@ -3,7 +3,7 @@ package dataAccess.memory;
 import chess.ChessGame;
 import dataAccess.GameDAO;
 import model.GameData;
-import service.exception.ServerException;
+import exception.ServerException;
 
 import java.util.ArrayList;
 import java.util.List;

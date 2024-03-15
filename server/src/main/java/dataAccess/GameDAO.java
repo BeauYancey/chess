@@ -2,7 +2,7 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
-import service.exception.ServerException;
+import exception.ServerException;
 
 import java.util.List;
 
