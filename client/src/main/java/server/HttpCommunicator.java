@@ -41,4 +41,23 @@ public class HttpCommunicator {
             throw new ServerException(responseCode);
         }
     }
+
+    public void doDelete(String path, String authToken) throws IOException, ServerException {
+        URL url = new URL(path);
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setReadTimeout(5000);
+        connection.setRequestMethod("DELETE");
+        connection.setDoOutput(true);
+
+        if (authToken != null) {
+            connection.setRequestProperty("Authorization", authToken);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw new ServerException(responseCode);
+        }
+    }
 }

@@ -6,6 +6,8 @@ import chess.ChessGame.TeamColor;
 import exception.ServerException;
 import server.ServerFacade;
 
+import java.io.IOException;
+
 public class Client {
     private final String serverURL;
     private final ServerFacade serverFacade;
@@ -63,7 +65,11 @@ public class Client {
             try {
                 authToken = serverFacade.login(username, password).authToken();
             }
-            catch (Exception ex) {
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus());
+                return;
+            }
+            catch (IOException ex) {
                 repl.printErr(ex.getMessage());
                 return;
             }
@@ -88,7 +94,11 @@ public class Client {
             try {
                 authToken = serverFacade.register(username, password, email).authToken();
             }
-            catch (Exception ex) {
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus());
+                return;
+            }
+            catch (IOException ex) {
                 repl.printErr(ex.getMessage());
                 return;
             }
@@ -103,6 +113,18 @@ public class Client {
 
     private void logout() {
         if (state == State.LOGGEDIN) {
+            try {
+                serverFacade.logout(authToken);
+            }
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus());
+                return;
+            }
+            catch (IOException ex) {
+                repl.printErr(ex.getMessage());
+                return;
+            }
+
             state = State.LOGGEDOUT;
             repl.printMsg("Thanks for playing!");
         }
