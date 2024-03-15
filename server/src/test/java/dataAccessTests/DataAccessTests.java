@@ -222,7 +222,7 @@ public class DataAccessTests {
     }
 
     @Test
-    public void joinGameTest() throws DataAccessException, Exception403, Exception400 {
+    public void joinGameTest() throws DataAccessException, ServerException {
         int id = gameDAO.createGame("test-game", new ChessGame());
         gameDAO.joinGame(id, "test-user", "white");
 
@@ -233,14 +233,15 @@ public class DataAccessTests {
     }
 
     @Test
-    public void joinGame403() throws DataAccessException, Exception400 {
+    public void joinGame403() throws DataAccessException {
         try {
             int id = gameDAO.createGame("test-game", new ChessGame());
             gameDAO.joinGame(id, "test-user", "white");
             gameDAO.joinGame(id, "test-user-2", "white");
             Assertions.fail();
         }
-        catch (Exception403 ex) {
+        catch (ServerException ex) {
+            Assertions.assertEquals(ex.getStatus(), 403);
             Assertions.assertEquals(1, gameDAO.listAll().size());
             GameData gameData = gameDAO.listAll().getFirst();
             Assertions.assertEquals("test-user", gameData.whiteUsername());
@@ -248,13 +249,14 @@ public class DataAccessTests {
         }
     }
     @Test
-    public void joinGame400() throws DataAccessException, Exception403 {
+    public void joinGame400() throws DataAccessException {
         try {
             int id = gameDAO.createGame("test-game", new ChessGame());
             gameDAO.joinGame(id-1, "test-user", "white");
             Assertions.fail();
         }
-        catch (Exception400 ex) {
+        catch (ServerException ex) {
+            Assertions.assertEquals(ex.getStatus(), 400);
             Assertions.assertEquals(1, gameDAO.listAll().size());
             GameData gameData = gameDAO.listAll().getFirst();
             Assertions.assertNull(gameData.whiteUsername());

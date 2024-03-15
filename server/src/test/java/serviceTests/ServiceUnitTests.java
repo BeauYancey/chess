@@ -2,7 +2,6 @@ package serviceTests;
 
 import chess.ChessGame;
 import dataAccess.*;
-import dataAccess.memory.*;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,33 +44,30 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testRegister400() {
+    public void testRegister400() throws DataAccessException {
         RegisterRequest req = new RegisterRequest("test-user", null, null);
         RegisterResponse res = null;
         try {
             res = UserService.register(req, authDAO, userDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception400.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 400);
         }
         Assertions.assertNull(res);
     }
 
     @Test
-    public void testRegister403() {
+    public void testRegister403() throws ServerException, DataAccessException {
         RegisterRequest req = new RegisterRequest("test-user", "test-pass", "test@mail.com");
-        try {
-            UserService.register(req, authDAO, userDAO);
-        }
-        catch (Exception e) {}
+        UserService.register(req, authDAO, userDAO);
 
         RegisterRequest req2 = new RegisterRequest("test-user", "test-pass", "test@mail.com");
         RegisterResponse res = null;
         try {
             res = UserService.register(req2, authDAO, userDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception403.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 403);
         }
         Assertions.assertNull(res);
     }
@@ -98,7 +94,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testLogin401() {
+    public void testLogin401() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("test-user", "test-pass",
                 "test@mail.com");
         try {
@@ -111,8 +107,8 @@ public class ServiceUnitTests {
         try {
             res = UserService.login(req, authDAO, userDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception401.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 401);
         }
         Assertions.assertNull(res);
     }
@@ -133,7 +129,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testLogout401() {
+    public void testLogout401() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("test-user", "test-pass",
                 "test@mail.com");
         RegisterResponse registerResponse = null;
@@ -143,13 +139,13 @@ public class ServiceUnitTests {
             UserService.logout("bad-auth", authDAO);
             Assertions.fail();
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception401.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 401);
         }
     }
 
     @Test
-    public void testListGamesSuccess() throws DataAccessException{
+    public void testListGamesSuccess() throws DataAccessException {
         gameDAO.createGame("name1", new ChessGame());
         gameDAO.createGame("name2", new ChessGame());
         gameDAO.createGame("name10", new ChessGame());
@@ -178,8 +174,8 @@ public class ServiceUnitTests {
         try {
             res = GameService.listGames(authToken, authDAO, gameDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception401.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 401);
         }
 
         Assertions.assertNull(res);
@@ -208,7 +204,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testCreateGame400() throws DataAccessException{
+    public void testCreateGame400() throws DataAccessException {
         String authToken = "test-token";
         authDAO.addAuth(new AuthData(authToken, "test-user"));
 
@@ -218,14 +214,14 @@ public class ServiceUnitTests {
         try {
             res = GameService.createGame(req, authToken, authDAO, gameDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception400.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 400);
         }
         Assertions.assertNull(res);
     }
 
     @Test
-    public void testCreateGame401() {
+    public void testCreateGame401() throws DataAccessException {
         String authToken = "test-token";
         CreateRequest req = new CreateRequest("test-game");
 
@@ -233,14 +229,14 @@ public class ServiceUnitTests {
         try {
             res = GameService.createGame(req, authToken, authDAO, gameDAO);
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception401.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 401);
         }
         Assertions.assertNull(res);
     }
 
     @Test
-    public void testJoinGameSuccess() throws DataAccessException{
+    public void testJoinGameSuccess() throws DataAccessException {
         int id = gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
@@ -276,7 +272,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    public void testJoinGame400() throws DataAccessException{
+    public void testJoinGame400() throws DataAccessException {
         gameDAO.createGame("test-game", new ChessGame());
 
         String authToken = "test-auth";
@@ -288,8 +284,8 @@ public class ServiceUnitTests {
             GameService.joinGame(req, authToken, authDAO, gameDAO);
             Assertions.fail();
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception400.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 400);
         }
     }
 
@@ -305,8 +301,8 @@ public class ServiceUnitTests {
             GameService.joinGame(req, authToken, authDAO, gameDAO);
             Assertions.fail();
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception401.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 401);
         }
     }
 
@@ -324,8 +320,8 @@ public class ServiceUnitTests {
             GameService.joinGame(req, authToken, authDAO, gameDAO);
             Assertions.fail();
         }
-        catch (Exception e) {
-            Assertions.assertEquals(e.getClass(), Exception403.class);
+        catch (ServerException e) {
+            Assertions.assertEquals(e.getStatus(), 403);
         }
     }
 

@@ -3,8 +3,7 @@ package dataAccess.memory;
 import chess.ChessGame;
 import dataAccess.GameDAO;
 import model.GameData;
-import service.exception.Exception400;
-import service.exception.Exception403;
+import service.exception.ServerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,19 +31,19 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(int gameID, String username, String color) throws Exception400, Exception403 {
+    public void joinGame(int gameID, String username, String color) throws ServerException {
         for (int i = 0; i < size; i++) {
             if (gameDatabase.get(i).gameID() == gameID) {
                 GameData game = gameDatabase.get(i);
                 if (color.equals("WHITE")) {
                     if (!(game.whiteUsername() == null)) {
-                        throw new Exception403();
+                        throw new ServerException(403, "Error: already taken");
                     }
                     game = game.setWhite(username);
                 }
                 else if (color.equals("BLACK")) {
                     if (!(game.blackUsername() == null)) {
-                        throw new Exception403();
+                        throw new ServerException(403, "Error: already taken");
                     }
                     game = game.setBlack(username);
                 }
@@ -53,7 +52,7 @@ public class MemoryGameDAO implements GameDAO {
                 return;
             }
         }
-        throw new Exception400();
+        throw new ServerException(400, "Error: bad request");
     }
 
     @Override

@@ -24,9 +24,9 @@ public class GameHandler {
             res.status(200);
             return gson.toJson(response);
         }
-        catch (Exception401 e) {
-            res.status(401);
-            return "{ \"message\": \"Error: unauthorized\" }";
+        catch (ServerException ex) {
+            res.status(ex.getStatus());
+            return "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
         catch (DataAccessException e) {
             res.status(500);
@@ -44,13 +44,9 @@ public class GameHandler {
             res.status(200);
             return gson.toJson(response);
         }
-        catch (Exception400 e) {
-            res.status(400);
-            return "{ \"message\": \"Error: bad request\" }";
-        }
-        catch (Exception401 e) {
-            res.status(401);
-            return "{ \"message\": \"Error: unauthorized\" }";
+        catch (ServerException ex) {
+            res.status(ex.getStatus());
+            return "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
         catch (DataAccessException e) {
             res.status(500);
@@ -67,17 +63,9 @@ public class GameHandler {
             res.status(200);
             return "{}";
         }
-        catch (Exception400 e) {
-            res.status(400);
-            return "{ \"message\": \"Error: bad request\" }";
-        }
-        catch (Exception401 e) {
-            res.status(401);
-            return "{ \"message\": \"Error: unauthorized\" }";
-        }
-        catch (Exception403 e) {
-            res.status(403);
-            return "{ \"message\": \"Error: already taken\" }";
+        catch (ServerException ex) {
+            res.status(ex.getStatus());
+            return "{ \"message\": \"" + ex.getMessage() + "\" }";
         }
         catch (DataAccessException e) {
             res.status(500);

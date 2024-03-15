@@ -10,21 +10,19 @@ import requestResponse.LoginRequest;
 import requestResponse.LoginResponse;
 import requestResponse.RegisterRequest;
 import requestResponse.RegisterResponse;
-import service.exception.Exception400;
-import service.exception.Exception401;
-import service.exception.Exception403;
+import service.exception.ServerException;
 
 import java.util.UUID;
 
 public class UserService {
 
     public static RegisterResponse register(RegisterRequest request, AuthDAO authDAO, UserDAO userDAO)
-            throws Exception400, Exception403, DataAccessException {
+            throws ServerException, DataAccessException {
         if (request.username() == null || request.password() == null || request.email() == null) {
-            throw new Exception400();
+            throw new ServerException(400, "Error: bad request");
         }
         if (userDAO.getUser(request.username()) != null) {
-            throw new Exception403();
+            throw new ServerException(403, "Error: already taken");
         }
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -38,15 +36,15 @@ public class UserService {
     }
 
     public static LoginResponse login(LoginRequest request, AuthDAO authDAO, UserDAO userDAO)
-            throws Exception400, Exception401, DataAccessException {
+            throws ServerException, DataAccessException {
         if (request.username() == null || request.password() == null) {
-            throw new Exception400();
+            throw new ServerException(400, "Error: bad request");
         }
 
         UserData user = userDAO.getUser(request.username());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if (user == null || !encoder.matches(request.password(), user.password())) {
-            throw new Exception401();
+            throw new ServerException(401, "Error: unauthorized");
         }
 
         String authToken = UUID.randomUUID().toString();
@@ -56,9 +54,9 @@ public class UserService {
         return new LoginResponse(request.username(), authToken);
     }
 
-    public static void logout(String authToken, AuthDAO authDAO) throws Exception401, DataAccessException {
+    public static void logout(String authToken, AuthDAO authDAO) throws ServerException, DataAccessException {
         if (authDAO.getAuth(authToken) == null) {
-            throw new Exception401();
+            throw new ServerException(401, "Error: unauthorized");
         }
 
         authDAO.removeAuth(authToken);

@@ -3,8 +3,7 @@ package dataAccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
-import service.exception.Exception400;
-import service.exception.Exception403;
+import service.exception.ServerException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -90,7 +89,7 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void joinGame(int gameID, String username, String color) throws DataAccessException, Exception403, Exception400 {
+    public void joinGame(int gameID, String username, String color) throws DataAccessException, ServerException {
         String field = color.toLowerCase() + "_username";
         String query = String.format("SELECT %s FROM games WHERE id = ?", field);
         String statement = String.format("UPDATE games SET %s = ? WHERE id = ?", field);
@@ -100,11 +99,11 @@ public class SQLGameDAO implements GameDAO {
                 var rs = preparedStatement.executeQuery();
                 if (rs.next()) {
                     if (rs.getString(1) != null) {
-                        throw new Exception403();
+                        throw new ServerException(403, "Error: already taken");
                     }
                 }
                 else {
-                    throw new Exception400();
+                    throw new ServerException(400, "Error: bad request");
                 }
             }
             try (var preparedStatement = conn.prepareStatement(statement)) {
