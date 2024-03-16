@@ -4,9 +4,10 @@ import static ui.EscapeSequences.*;
 import chess.*;
 import chess.ChessGame.TeamColor;
 import exception.ServerException;
+import model.GameData;
 import server.ServerFacade;
-
 import java.io.IOException;
+import java.util.List;
 
 public class Client {
     private final String serverURL;
@@ -14,6 +15,7 @@ public class Client {
     private final Repl repl;
     private State state = State.LOGGEDOUT;
     private String authToken = null;
+    private List<GameData> gameList;
 
     public Client(String serverURL, Repl repl) {
         this.serverURL = serverURL;
@@ -66,12 +68,10 @@ public class Client {
                 authToken = serverFacade.login(username, password).authToken();
             }
             catch (ServerException ex) {
-                repl.printErr("Error code " + ex.getStatus());
-                return;
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
             }
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
-                return;
             }
 
             state = State.LOGGEDIN;
@@ -95,12 +95,10 @@ public class Client {
                 authToken = serverFacade.register(username, password, email).authToken();
             }
             catch (ServerException ex) {
-                repl.printErr("Error code " + ex.getStatus());
-                return;
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
             }
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
-                return;
             }
 
             state = State.LOGGEDIN;
@@ -115,14 +113,13 @@ public class Client {
         if (state == State.LOGGEDIN) {
             try {
                 serverFacade.logout(authToken);
+                authToken = null;
             }
             catch (ServerException ex) {
-                repl.printErr("Error code " + ex.getStatus());
-                return;
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
             }
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
-                return;
             }
 
             state = State.LOGGEDOUT;
@@ -137,7 +134,16 @@ public class Client {
         if (state == State.LOGGEDIN) {
             repl.printMsg("Enter the name of your game:");
             String name = repl.scanWord();
-            repl.printMsg("Game " + name + " has been created");
+            try {
+                serverFacade.createGame(name, authToken);
+                repl.printMsg("Game " + name + " has been created");
+            }
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
+            }
+            catch (IOException ex) {
+                repl.printErr(ex.getMessage());
+            }
         }
         else {
             repl.printErr("invalid instruction");
@@ -146,9 +152,26 @@ public class Client {
 
     private void list() {
         if (state == State.LOGGEDIN) {
-            repl.printMsg("1. game-name\n" +
-                    "\tWhite: white-user\n" +
-                    "\tBlack: black-user");
+            try {
+                this.gameList = serverFacade.listGames(authToken).games();
+                int i = 0;
+                while (i < this.gameList.size()) {
+                    GameData game = this.gameList.get(i);
+                    i++;
+                    String white = game.whiteUsername() == null ? game.whiteUsername() : "none";
+                    String black = game.whiteUsername() == null ? game.blackUsername() : "none";
+                    String gameStr = i + ". " + game.gameName() +
+                            "\n\tWhite Player: " + white +
+                            "\n\tBlack Player: " + black;
+                    repl.printMsg(gameStr);
+                }
+            }
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
+            }
+            catch (IOException ex) {
+                repl.printErr(ex.getMessage());
+            }
         }
         else {
             repl.printErr("invalid instruction");

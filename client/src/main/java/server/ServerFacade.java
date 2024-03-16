@@ -31,4 +31,13 @@ public class ServerFacade {
     public void logout(String authToken) throws ServerException, IOException {
         communicator.doDelete(url + "/session", authToken);
     }
+
+    public ListGameResponse listGames(String authToken) throws ServerException, IOException {
+        return communicator.doGet(url + "/game", authToken, ListGameResponse.class);
+    }
+
+    public CreateResponse createGame(String name, String authToken) throws ServerException, IOException {
+        CreateRequest req = new CreateRequest(name);
+        return communicator.doPost(url + "/game", req, authToken, CreateResponse.class);
+    }
 }

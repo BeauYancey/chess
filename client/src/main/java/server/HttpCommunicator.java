@@ -12,6 +12,47 @@ public class HttpCommunicator {
     public HttpCommunicator() {
         gson = new Gson();
     }
+
+    class MessageContainer {
+        public String message;
+        public MessageContainer(String msg) {
+            this.message = msg;
+        }
+    }
+
+    public <T> T doGet(String path, String authToken, Class<T> responseClass) throws IOException, ServerException {
+        URL url = new URL(path);
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setReadTimeout(5000);
+        connection.setRequestMethod("GET");
+
+        if (authToken != null) {
+            connection.setRequestProperty("Authorization", authToken);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getInputStream())) {
+                return gson.fromJson(responseBody, responseClass);
+            }
+        }
+        else {
+            MessageContainer msgCnt;
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
+                int t;
+                String msg = "";
+                while ((t = responseBody.read()) != -1) {
+                    msg += (char)t;
+                }
+                msgCnt = gson.fromJson(msg, MessageContainer.class);
+            }
+            throw new ServerException(responseCode, msgCnt.message);
+        }
+
+    }
+
     public <T> T doPost(String path, Object req, String authToken, Class<T> responseClass)
             throws IOException, ServerException {
         URL url = new URL(path);
@@ -38,7 +79,11 @@ public class HttpCommunicator {
             }
         }
         else {
-            throw new ServerException(responseCode);
+            MessageContainer msg;
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getInputStream())) {
+                msg = gson.fromJson(responseBody, MessageContainer.class);
+            }
+            throw new ServerException(responseCode, msg.message);
         }
     }
 
@@ -49,7 +94,6 @@ public class HttpCommunicator {
 
         connection.setReadTimeout(5000);
         connection.setRequestMethod("DELETE");
-        connection.setDoOutput(true);
 
         if (authToken != null) {
             connection.setRequestProperty("Authorization", authToken);
@@ -57,7 +101,11 @@ public class HttpCommunicator {
 
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new ServerException(responseCode);
+            MessageContainer msg;
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getInputStream())) {
+                msg = gson.fromJson(responseBody, MessageContainer.class);
+            }
+            throw new ServerException(responseCode, msg.message);
         }
     }
 }
