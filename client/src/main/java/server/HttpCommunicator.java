@@ -39,16 +39,11 @@ public class HttpCommunicator {
             }
         }
         else {
-            MessageContainer msgCnt;
+            MessageContainer msg;
             try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
-                int t;
-                String msg = "";
-                while ((t = responseBody.read()) != -1) {
-                    msg += (char)t;
-                }
-                msgCnt = gson.fromJson(msg, MessageContainer.class);
+                msg = gson.fromJson(responseBody, MessageContainer.class);
             }
-            throw new ServerException(responseCode, msgCnt.message);
+            throw new ServerException(responseCode, msg.message);
         }
 
     }
@@ -68,7 +63,6 @@ public class HttpCommunicator {
         }
 
         try(OutputStreamWriter requestBody = new OutputStreamWriter(connection.getOutputStream())) {
-            // Write request body to OutputStream ...
             requestBody.write(gson.toJson(req));
         }
 
@@ -80,7 +74,34 @@ public class HttpCommunicator {
         }
         else {
             MessageContainer msg;
-            try (InputStreamReader responseBody = new InputStreamReader(connection.getInputStream())) {
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
+                msg = gson.fromJson(responseBody, MessageContainer.class);
+            }
+            throw new ServerException(responseCode, msg.message);
+        }
+    }
+
+    public void doPut(String path, Object req, String authToken) throws IOException, ServerException {
+        URL url = new URL(path);
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setReadTimeout(5000);
+        connection.setRequestMethod("PUT");
+        connection.setDoOutput(true);
+
+        if (authToken != null) {
+            connection.setRequestProperty("Authorization", authToken);
+        }
+
+        try(OutputStreamWriter requestBody = new OutputStreamWriter(connection.getOutputStream())) {
+            requestBody.write(gson.toJson(req));
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            MessageContainer msg;
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
                 msg = gson.fromJson(responseBody, MessageContainer.class);
             }
             throw new ServerException(responseCode, msg.message);
@@ -102,7 +123,7 @@ public class HttpCommunicator {
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
             MessageContainer msg;
-            try (InputStreamReader responseBody = new InputStreamReader(connection.getInputStream())) {
+            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
                 msg = gson.fromJson(responseBody, MessageContainer.class);
             }
             throw new ServerException(responseCode, msg.message);

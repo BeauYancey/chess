@@ -66,6 +66,8 @@ public class Client {
 
             try {
                 authToken = serverFacade.login(username, password).authToken();
+                state = State.LOGGEDIN;
+                repl.printMsg("Welcome " + username);
             }
             catch (ServerException ex) {
                 repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
@@ -73,9 +75,6 @@ public class Client {
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
             }
-
-            state = State.LOGGEDIN;
-            repl.printMsg("Welcome " + username);
         }
         else {
             repl.printErr("invalid instruction");
@@ -93,6 +92,8 @@ public class Client {
 
             try {
                 authToken = serverFacade.register(username, password, email).authToken();
+                state = State.LOGGEDIN;
+                repl.printMsg("Welcome " + username);
             }
             catch (ServerException ex) {
                 repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
@@ -100,9 +101,6 @@ public class Client {
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
             }
-
-            state = State.LOGGEDIN;
-            repl.printMsg("Welcome " + username);
         }
         else {
             repl.printErr("invalid instruction");
@@ -114,6 +112,8 @@ public class Client {
             try {
                 serverFacade.logout(authToken);
                 authToken = null;
+                state = State.LOGGEDOUT;
+                repl.printMsg("Thanks for playing!");
             }
             catch (ServerException ex) {
                 repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
@@ -121,9 +121,6 @@ public class Client {
             catch (IOException ex) {
                 repl.printErr(ex.getMessage());
             }
-
-            state = State.LOGGEDOUT;
-            repl.printMsg("Thanks for playing!");
         }
         else {
             repl.printErr("invalid instruction");
@@ -158,8 +155,8 @@ public class Client {
                 while (i < this.gameList.size()) {
                     GameData game = this.gameList.get(i);
                     i++;
-                    String white = game.whiteUsername() == null ? game.whiteUsername() : "none";
-                    String black = game.whiteUsername() == null ? game.blackUsername() : "none";
+                    String white = game.whiteUsername() == null ? "none" : game.whiteUsername();
+                    String black = game.blackUsername() == null ? "none" : game.blackUsername();
                     String gameStr = i + ". " + game.gameName() +
                             "\n\tWhite Player: " + white +
                             "\n\tBlack Player: " + black;
@@ -180,25 +177,34 @@ public class Client {
 
     private void join() {
         if (state == State.LOGGEDIN) {
+            if (gameList == null) {
+                repl.printErr("You must list the games before you can choose one to join");
+                return;
+            }
             repl.printMsg("Enter the number of the game you wish to join:");
-            int gameNum = Integer.parseInt(repl.scanWord());
+            int index = Integer.parseInt(repl.scanWord()) - 1;
+            int gameID = gameList.get(index).gameID();
+
             repl.printMsg("Enter the color you wish to play as (white/black):");
             String colorStr = repl.scanWord();
-            TeamColor color;
-            if (colorStr.equals("white")) {
-                color = TeamColor.WHITE;
-            }
-            else if (colorStr.equals("black")) {
-                color = TeamColor.BLACK;
-            }
-            else {
+            if (!(colorStr.equals("white") || colorStr.equals("black"))) {
                 repl.printErr("invalid color");
                 return;
             }
 
-            ChessGame game = new ChessGame();
-            drawBoard(game.getBoard(), TeamColor.WHITE);
-            drawBoard(game.getBoard(), TeamColor.BLACK);
+            try {
+                serverFacade.joinGame(colorStr, gameID, authToken);
+
+                ChessGame game = gameList.get(index).game();
+                drawBoard(game.getBoard(), TeamColor.WHITE);
+                drawBoard(game.getBoard(), TeamColor.BLACK);
+            }
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
+            }
+            catch (IOException ex) {
+                repl.printErr(ex.getMessage());
+            }
         }
         else {
             repl.printErr("invalid instruction");
@@ -208,19 +214,27 @@ public class Client {
 
     private void observe() {
         if (state == State.LOGGEDIN) {
-            repl.printMsg("Enter the number of the game you wish to observe:");
-            int gameNum = Integer.parseInt(repl.scanWord());
-
-            ChessGame game = new ChessGame();
-            try {
-                game.makeMove(new ChessMove(new ChessPosition(2, 1), new ChessPosition(4, 1), null));
+            if (gameList == null) {
+                repl.printErr("You must list the games before you can choose one to observe");
+                return;
             }
-            catch (InvalidMoveException ex) {
-                repl.printErr("Invalid Move:");
+            repl.printMsg("Enter the number of the game you wish to observe:");
+            int index = Integer.parseInt(repl.scanWord()) - 1;
+            int gameID = gameList.get(index).gameID();
+
+            try {
+                serverFacade.joinGame(null, gameID, authToken);
+
+                ChessGame game = gameList.get(index).game();
+                drawBoard(game.getBoard(), TeamColor.WHITE);
+                drawBoard(game.getBoard(), TeamColor.BLACK);
+            }
+            catch (ServerException ex) {
+                repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
+            }
+            catch (IOException ex) {
                 repl.printErr(ex.getMessage());
             }
-            drawBoard(game.getBoard(), TeamColor.WHITE);
-            drawBoard(game.getBoard(), TeamColor.BLACK);
         }
         else {
             repl.printErr("invalid instruction");

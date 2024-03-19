@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import exception.ServerException;
 import requestResponse.*;
 
@@ -39,5 +40,14 @@ public class ServerFacade {
     public CreateResponse createGame(String name, String authToken) throws ServerException, IOException {
         CreateRequest req = new CreateRequest(name);
         return communicator.doPost(url + "/game", req, authToken, CreateResponse.class);
+    }
+
+    public void joinGame(String team, int gameID, String authToken) throws ServerException, IOException {
+        JoinRequest req = new JoinRequest(team, gameID);
+        communicator.doPut(url + "/game", req, authToken);
+    }
+
+    public void clearDBs() throws ServerException, IOException {
+        communicator.doDelete(url + "/db", null);
     }
 }

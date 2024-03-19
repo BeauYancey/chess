@@ -98,7 +98,8 @@ public class SQLGameDAO implements GameDAO {
                 preparedStatement.setInt(1, gameID);
                 var rs = preparedStatement.executeQuery();
                 if (rs.next()) {
-                    if (rs.getString(1) != null) {
+                    String user = rs.getString(1);
+                    if (user != null) {
                         throw new ServerException(403, "Error: already taken");
                     }
                 }
