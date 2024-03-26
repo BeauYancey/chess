@@ -151,6 +151,10 @@ public class Client {
         if (state == State.LOGGEDIN) {
             try {
                 this.gameList = serverFacade.listGames(authToken).games();
+                if (this.gameList.isEmpty()) {
+                    repl.printMsg("There are no games in the database");
+                    return;
+                }
                 int i = 0;
                 while (i < this.gameList.size()) {
                     GameData game = this.gameList.get(i);
