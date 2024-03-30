@@ -16,6 +16,7 @@ public class Client {
     private State state = State.LOGGEDOUT;
     private String authToken = null;
     private List<GameData> gameList;
+    private GameplayClient gameplayClient;
 
     public Client(String serverURL, Repl repl) {
         this.serverURL = serverURL;
@@ -24,6 +25,10 @@ public class Client {
     }
 
     public void eval(String input){
+        if (state == State.GAMEPLAY) {
+            state = gameplayClient.eval(input);
+            return;
+        }
         switch (input) {
             case "help" -> help();
             case "login" -> login();
@@ -200,8 +205,12 @@ public class Client {
                 serverFacade.joinGame(colorStr, gameID, authToken);
 
                 ChessGame game = gameList.get(index).game();
-                drawBoard(game.getBoard(), TeamColor.WHITE);
-                drawBoard(game.getBoard(), TeamColor.BLACK);
+
+                TeamColor color = colorStr.equals("white") ? TeamColor.WHITE : TeamColor.BLACK;
+                repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
+
+                gameplayClient = new GameplayClient(game, color, repl);
+                state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
                 repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
@@ -230,8 +239,10 @@ public class Client {
                 serverFacade.joinGame(null, gameID, authToken);
 
                 ChessGame game = gameList.get(index).game();
-                drawBoard(game.getBoard(), TeamColor.WHITE);
-                drawBoard(game.getBoard(), TeamColor.BLACK);
+                repl.printMsg(Drawer.drawBoard(game.getBoard(), TeamColor.WHITE));
+
+                gameplayClient = new GameplayClient(game, null, repl);
+                state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
                 repl.printErr("Error code " + ex.getStatus() + ": " + ex.getMessage());
@@ -242,61 +253,6 @@ public class Client {
         }
         else {
             repl.printErr("invalid instruction");
-        }
-    }
-
-    private void drawBoard(ChessBoard board, TeamColor team) {
-        String brd = "";
-        brd += drawHeader(team);
-        for (int i = 1; i <= 8; i++) {
-            brd += drawRow(board, i, team);
-        }
-        brd += drawHeader(team);
-        brd += RESET_BG_COLOR + RESET_TEXT_COLOR;
-        repl.printMsg(brd);
-    }
-
-    private String drawHeader(TeamColor team) {
-
-        if (team == TeamColor.WHITE) {
-            return SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + "    a  b  c  d  e  f  g  h    " + RESET_BG_COLOR + "\n";
-        }
-        else {
-            return SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + "    h  g  f  e  d  c  b  a    " + RESET_BG_COLOR + "\n";
-        }
-    }
-
-    private String drawRow(ChessBoard board, int rowIndex, TeamColor team) {
-        if (team == TeamColor.WHITE) {
-            rowIndex = 9 - rowIndex;
-        }
-
-        String row = "";
-        row += SET_BG_COLOR_WHITE + " " + rowIndex + " ";
-
-        if (team == TeamColor.WHITE) {
-            for (int col = 1; col <= 8; col++) {
-                String bgColor = ((rowIndex + col) % 2) == 1 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                row += drawSquare(board.getPiece(new ChessPosition(rowIndex, col)), bgColor);
-            }
-        }
-        else {
-            for (int col = 8; col >= 1; col--) {
-                String bgColor = ((rowIndex + col) % 2) == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                row += drawSquare(board.getPiece(new ChessPosition(rowIndex, col)), bgColor);
-            }
-        }
-        return row + SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + " " + rowIndex + " " + RESET_BG_COLOR + "\n";
-    }
-
-    private String drawSquare(ChessPiece piece, String bgColor) {
-        if (piece == null) {
-            return bgColor + EMPTY;
-        }
-        else {
-            String textColor = piece.getTeamColor() == TeamColor.WHITE ?
-                    SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_BLACK;
-            return bgColor + textColor + " " + piece + " ";
         }
     }
 }
