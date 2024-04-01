@@ -1,6 +1,5 @@
 package ui;
 
-import static ui.EscapeSequences.*;
 import chess.*;
 import chess.ChessGame.TeamColor;
 import exception.ServerException;
@@ -10,7 +9,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class Client {
-    private final String serverURL;
     private final ServerFacade serverFacade;
     private final Repl repl;
     private State state = State.LOGGEDOUT;
@@ -19,7 +17,6 @@ public class Client {
     private GameplayClient gameplayClient;
 
     public Client(String serverURL, Repl repl) {
-        this.serverURL = serverURL;
         serverFacade = new ServerFacade(serverURL);
         this.repl = repl;
     }

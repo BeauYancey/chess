@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 
 public class GameplayClient {
     ChessGame.TeamColor color;
@@ -42,15 +43,21 @@ public class GameplayClient {
     }
 
     private void draw() {
-        repl.printMsg("You entered draw");
+        repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
     }
 
     private void move() {
-        repl.printMsg("You entered move");
+        repl.printMsg("Enter the position of the piece you would like to move (i.e. d4).");
+        ChessPosition startPosition = repl.scanPosition();
+        repl.printMsg("Enter the position you would like to move this piece to (i.e. d4).");
+        ChessPosition endPosition = repl.scanPosition();
     }
 
     private void highlight() {
-        repl.printMsg("You entered highlight");
+        repl.printMsg("Enter the position of the piece you would like to see move moves for.");
+        ChessPosition position = repl.scanPosition();
+        ChessGame.TeamColor color = this.color == null ? ChessGame.TeamColor.WHITE : this.color;
+        repl.printMsg(Drawer.drawBoard(game.getBoard(), color, position));
     }
 
     private void resign() {

@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessPosition;
+
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -42,5 +44,13 @@ public class Repl {
 
     public String scanWord() {
         return String.join("-", scanner.nextLine().trim().split(" "));
+    }
+
+    public ChessPosition scanPosition() {
+        String columns = " abcdefgh";
+        String posString = scanner.nextLine().trim();
+        int row = Integer.parseInt(posString.substring(1));
+        int col = columns.indexOf(posString.substring(0,1));
+        return new ChessPosition(row, col);
     }
 }
