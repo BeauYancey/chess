@@ -1,17 +1,19 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPosition;
+import chess.*;
+import server.ServerFacade;
 
 public class GameplayClient {
     ChessGame.TeamColor color;
     ChessGame game;
     Repl repl;
+    ServerFacade facade;
 
-    public GameplayClient(ChessGame game, ChessGame.TeamColor color, Repl repl) {
+    public GameplayClient(ChessGame game, ChessGame.TeamColor color, Repl repl, ServerFacade facade) {
         this.color = color;
         this.game = game;
         this.repl = repl;
+        this.facade = facade;
     }
 
     public State eval(String input) {
@@ -33,13 +35,22 @@ public class GameplayClient {
     }
 
     private void help() {
-        repl.printMsg("Choose from one of the following options:\n" +
-                "\tHelp: see this message again\n" +
-                "\tDraw: Re-draw the chessboard\n" +
-                "\tMove: Make a move\n" +
-                "\tHighlight: Highlight all legal moves for a specified piece\n" +
-                "\tResign: Forfeit the match and end the game\n" +
-                "\tLeave: Leave the game");
+        if (color != null) {
+            repl.printMsg("Choose from one of the following options:\n" +
+                    "\tHelp: see this message again\n" +
+                    "\tDraw: Re-draw the chessboard\n" +
+                    "\tMove: Make a move\n" +
+                    "\tHighlight: Highlight all legal moves for a specified piece\n" +
+                    "\tResign: Forfeit the match and end the game\n" +
+                    "\tLeave: Leave the game");
+        }
+        else {
+            repl.printMsg("Choose from one of the following options:\n" +
+                    "\tHelp: see this message again\n" +
+                    "\tDraw: Re-draw the chessboard\n" +
+                    "\tHighlight: Highlight all legal moves for a specified piece\n" +
+                    "\tLeave: Leave the game");
+        }
     }
 
     private void draw() {
@@ -47,10 +58,22 @@ public class GameplayClient {
     }
 
     private void move() {
+        if (this.color == null) {
+            repl.printErr("invalid instruction");
+            return;
+        }
         repl.printMsg("Enter the position of the piece you would like to move (i.e. d4).");
         ChessPosition startPosition = repl.scanPosition();
         repl.printMsg("Enter the position you would like to move this piece to (i.e. d4).");
         ChessPosition endPosition = repl.scanPosition();
+        repl.printMsg("If this move results in a promotion, enter the promotion piece. Otherwise, press enter");
+        String pieceStr = repl.scanWord();
+        ChessPiece.PieceType promo = strToPiece(pieceStr);
+        ChessMove move = new ChessMove(startPosition, endPosition, promo);
+
+        if (!game.getBoard().getPiece(startPosition).pieceMoves(game.getBoard(), startPosition).contains(move)) {
+            repl.printErr("Invalid move. Please enter a gameplay command to continue.");
+        }
     }
 
     private void highlight() {
@@ -61,10 +84,24 @@ public class GameplayClient {
     }
 
     private void resign() {
+        if (this.color == null) {
+            repl.printErr("invalid instruction");
+            return;
+        }
         repl.printMsg("You entered resign");
     }
 
     private void leave() {
         repl.printMsg("You entered leave");
+    }
+
+    private ChessPiece.PieceType strToPiece(String pieceStr) {
+        return switch (pieceStr) {
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            default -> null;
+        };
     }
 }

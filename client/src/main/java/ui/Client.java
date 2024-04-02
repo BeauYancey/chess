@@ -206,7 +206,7 @@ public class Client {
                 TeamColor color = colorStr.equals("white") ? TeamColor.WHITE : TeamColor.BLACK;
                 repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
 
-                gameplayClient = new GameplayClient(game, color, repl);
+                gameplayClient = new GameplayClient(game, color, repl, serverFacade);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
@@ -238,7 +238,7 @@ public class Client {
                 ChessGame game = gameList.get(index).game();
                 repl.printMsg(Drawer.drawBoard(game.getBoard(), TeamColor.WHITE));
 
-                gameplayClient = new GameplayClient(game, null, repl);
+                gameplayClient = new GameplayClient(game, null, repl, serverFacade);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
