@@ -10,6 +10,7 @@ import webSocketMessages.serverMessages.ServerMessage;
 public class ConnectionManager {
     public final HashMap<String, Connection> connections = new HashMap<>();
 
+
     public void add(String visitorName, Session session) {
         var connection = new Connection(visitorName, session);
         connections.put(visitorName, connection);
@@ -24,14 +25,13 @@ public class ConnectionManager {
         for (Connection c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.playerName.equals(playerName)) {
-                    c.send(message.toString());
+                    c.send(message);
                 }
             } else {
                 removeList.add(c);
             }
         }
 
-        // Clean up any connections that were left open.
         for (Connection c : removeList) {
             connections.remove(c.playerName);
         }

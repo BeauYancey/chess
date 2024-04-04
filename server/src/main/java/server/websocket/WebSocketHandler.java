@@ -16,13 +16,23 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException {
         UserGameCommand cmd = new Gson().fromJson(message, UserGameCommand.class);
         switch (cmd.getCommandType()) {
-            case JOIN_PLAYER -> nothing();
-            case JOIN_OBSERVER -> nothing();
-            case MAKE_MOVE -> nothing();
-            case LEAVE -> nothing();
-            case RESIGN -> nothing();
+            case JOIN_PLAYER -> joinPlayer();
+            case JOIN_OBSERVER -> joinObserver();
+            case MAKE_MOVE -> move();
+            case LEAVE -> leave();
+            case RESIGN -> resign();
         }
     }
 
-    private void nothing() {}
+    private void joinPlayer() {}
+
+    private void joinObserver() {
+        System.out.println("Entering server.WebSocketHandler.joinObserver");
+    }
+
+    private void move() {}
+
+    private void leave() {}
+
+    private void resign() {}
 }
