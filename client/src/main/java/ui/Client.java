@@ -10,14 +10,16 @@ import java.util.List;
 
 public class Client {
     private final ServerFacade serverFacade;
-    private final Repl repl;
+    public final Repl repl;
     private State state = State.LOGGEDOUT;
-    private String authToken = null;
+    public String authToken = null;
     private List<GameData> gameList;
     private GameplayClient gameplayClient;
+    public String url;
 
     public Client(String serverURL, Repl repl) {
         serverFacade = new ServerFacade(serverURL);
+        this.url = serverURL;
         this.repl = repl;
     }
 
@@ -206,7 +208,7 @@ public class Client {
                 TeamColor color = colorStr.equals("white") ? TeamColor.WHITE : TeamColor.BLACK;
                 repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
 
-                gameplayClient = new GameplayClient(game, color, repl, serverFacade);
+                gameplayClient = new GameplayClient(gameList.get(index), color, this);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
@@ -238,7 +240,7 @@ public class Client {
                 ChessGame game = gameList.get(index).game();
                 repl.printMsg(Drawer.drawBoard(game.getBoard(), TeamColor.WHITE));
 
-                gameplayClient = new GameplayClient(game, null, repl, serverFacade);
+                gameplayClient = new GameplayClient(gameList.get(index), null, this);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {

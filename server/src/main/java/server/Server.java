@@ -24,13 +24,11 @@ public class Server {
             auths = new SQLAuthDAO();
             users = new SQLUserDAO();
             games = new SQLGameDAO();
-
+            Spark.webSocket("/connect", new WebSocketHandler());
         }
         catch (DataAccessException ex){
             return 0;
         }
-
-        Spark.webSocket("/connect", new WebSocketHandler());
 
         Spark.delete("/db", (Request req, Response res) -> ClearHandler.clear(req, res, auths, users, games));
         Spark.post("/user", (Request req, Response res) -> UserHandler.register(req, res, auths, users));

@@ -1,19 +1,26 @@
 package ui;
 
 import chess.*;
+import exception.ServerException;
+import model.GameData;
 import server.ServerFacade;
+import server.WebSocketFacade;
 
 public class GameplayClient {
     ChessGame.TeamColor color;
-    ChessGame game;
+    GameData gameData;
     Repl repl;
     ServerFacade facade;
+    WebSocketFacade wsFacade;
+    String authToken;
 
-    public GameplayClient(ChessGame game, ChessGame.TeamColor color, Repl repl, ServerFacade facade) {
+    public GameplayClient(GameData gameData, ChessGame.TeamColor color, Client genClient) throws ServerException {
         this.color = color;
-        this.game = game;
-        this.repl = repl;
-        this.facade = facade;
+        this.gameData = gameData;
+        this.repl = genClient.repl;
+        this.facade = new ServerFacade(genClient.url);
+        this.wsFacade = new WebSocketFacade(genClient.url, repl);
+        this.authToken = genClient.authToken;
     }
 
     public State eval(String input) {
@@ -54,7 +61,7 @@ public class GameplayClient {
     }
 
     private void draw() {
-        repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
+        repl.printMsg(Drawer.drawBoard(gameData.game().getBoard(), color));
     }
 
     private void move() {
@@ -71,8 +78,15 @@ public class GameplayClient {
         ChessPiece.PieceType promo = strToPiece(pieceStr);
         ChessMove move = new ChessMove(startPosition, endPosition, promo);
 
-        if (!game.getBoard().getPiece(startPosition).pieceMoves(game.getBoard(), startPosition).contains(move)) {
+        if (!gameData.game().getBoard().getPiece(startPosition).pieceMoves(gameData.game().getBoard(), startPosition).contains(move)) {
             repl.printErr("Invalid move. Please enter a gameplay command to continue.");
+        }
+
+        try {
+            this.wsFacade.makeMove(authToken, gameData.gameID(), move);
+        }
+        catch (ServerException ex) {
+            repl.printErr(ex.getMessage());
         }
     }
 
@@ -80,7 +94,7 @@ public class GameplayClient {
         repl.printMsg("Enter the position of the piece you would like to see move moves for.");
         ChessPosition position = repl.scanPosition();
         ChessGame.TeamColor color = this.color == null ? ChessGame.TeamColor.WHITE : this.color;
-        repl.printMsg(Drawer.drawBoard(game.getBoard(), color, position));
+        repl.printMsg(Drawer.drawBoard(gameData.game().getBoard(), color, position));
     }
 
     private void resign() {
