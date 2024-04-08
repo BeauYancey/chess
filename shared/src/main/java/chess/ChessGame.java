@@ -105,7 +105,7 @@ public class ChessGame {
         attemptMove(move);
         if (getTeamTurn() == TeamColor.WHITE) {
             setTeamTurn(TeamColor.BLACK);
-        } else {
+        } else if (getTeamTurn() == TeamColor.BLACK) {
             setTeamTurn(TeamColor.WHITE);
         }
     }

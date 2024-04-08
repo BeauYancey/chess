@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.*;
+import exception.ServerException;
 import model.*;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.Session;
@@ -12,10 +13,7 @@ import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserverCommand;
-import webSocketMessages.userCommands.JoinPlayerCommand;
-import webSocketMessages.userCommands.MakeMoveCommand;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,18 +42,43 @@ public class WebSocketHandler {
             case JOIN_PLAYER -> joinPlayer(session, message);
             case JOIN_OBSERVER -> joinObserver(session, message);
             case MAKE_MOVE -> move(session, message);
-            case LEAVE -> leave();
-            case RESIGN -> resign();
+            case LEAVE -> leave(session, message);
+            case RESIGN -> resign(session, message);
         }
     }
 
     private void joinPlayer(Session session, String msg) throws IOException {
         JoinPlayerCommand cmd = gson.fromJson(msg, JoinPlayerCommand.class);
         try {
+            GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
             AuthData authData = authDAO.getAuth(cmd.getAuthString());
+
+            if (cmd.playerColor == ChessGame.TeamColor.WHITE) {
+                if (!authData.userName().equals(gameData.whiteUsername())) {
+                    ErrorMessage err = new ErrorMessage("Error: you are not the " +
+                            cmd.playerColor +
+                            " player in this game");
+                    session.getRemote().sendString(gson.toJson(err));
+                    return;
+                }
+            }
+            else {
+                if (!authData.userName().equals(gameData.blackUsername())) {
+                    ErrorMessage err = new ErrorMessage("Error: you are not the " +
+                            cmd.playerColor +
+                            " player in this game");
+                    session.getRemote().sendString(gson.toJson(err));
+                    return;
+                }
+            }
 
             addConnection(session, cmd.gameID, authData.userName());
 
+            // Send LoadGameMessage to user
+            LoadGameMessage load = new LoadGameMessage(gameData);
+            session.getRemote().sendString(gson.toJson(load));
+
+            // Notify all other users in the game
             NotificationMessage notification = new NotificationMessage(authData.userName() +
                     "joined the game as the " +
                     cmd.playerColor + " player");
@@ -69,10 +92,22 @@ public class WebSocketHandler {
     private void joinObserver(Session session, String msg) throws IOException {
         JoinObserverCommand cmd = gson.fromJson(msg, JoinObserverCommand.class);
         try {
+            GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
             AuthData authData = authDAO.getAuth(cmd.getAuthString());
+
+            if (gameData == null) {
+                ErrorMessage err = new ErrorMessage("Error: game does not exist");
+                session.getRemote().sendString(gson.toJson(err));
+                return;
+            }
 
             addConnection(session, cmd.gameID, authData.userName());
 
+            // Send LoadGameMessage to user
+            LoadGameMessage load = new LoadGameMessage(gameData);
+            session.getRemote().sendString(gson.toJson(load));
+
+            // Notify all other users in the game
             NotificationMessage notification = new NotificationMessage(authData.userName() +
                     "joined the game as the an observer");
             this.connections.get(cmd.gameID).broadcast(authData.userName(), notification);
@@ -96,29 +131,40 @@ public class WebSocketHandler {
     private void move(Session session, String msg) throws IOException {
         MakeMoveCommand cmd = gson.fromJson(msg, MakeMoveCommand.class);
         try {
-            GameData gameData = null;
-            for (GameData games : GameService.listGames(cmd.getAuthString(), authDAO, gameDAO).games()) {
-                if (games.gameID() == cmd.gameID) {
-                    gameData = games;
-                    break;
+            GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
+            AuthData authData = authDAO.getAuth(cmd.getAuthString());
+            ChessGame.TeamColor pieceColor = gameData.game().getBoard().getPiece(cmd.move.getStartPosition()).getTeamColor();
+
+            if (pieceColor == ChessGame.TeamColor.WHITE) {
+                if (!authData.userName().equals(gameData.whiteUsername())) {
+                    ErrorMessage err = new ErrorMessage("Error: you are not the " +
+                            pieceColor +
+                            " player in this game");
+                    session.getRemote().sendString(gson.toJson(err));
+                    return;
                 }
             }
-            if (gameData == null) {
-                return;
+            else {
+                if (!authData.userName().equals(gameData.blackUsername())) {
+                    ErrorMessage err = new ErrorMessage("Error: you are not the " +
+                            pieceColor +
+                            " player in this game");
+                    session.getRemote().sendString(gson.toJson(err));
+                    return;
+                }
             }
-            AuthData authData = authDAO.getAuth(cmd.getAuthString());
+
 
             gameData.game().makeMove(cmd.move);
             GameService.updateGame(gameData, cmd.getAuthString(), authDAO, gameDAO);
 
+            // Notify all other users that a move was made
             NotificationMessage notification = new NotificationMessage(authData.userName() + " just made a move.");
-            String res = gson.toJson(notification);
-            session.getRemote().sendString(res);
             connections.get(cmd.gameID).broadcast(authData.userName(), notification);
 
+            // Send LoadGameMessage to all involved users
             LoadGameMessage load = new LoadGameMessage(gameData);
-            res = gson.toJson(load);
-            session.getRemote().sendString(res);
+            session.getRemote().sendString(gson.toJson(load));
             connections.get(cmd.gameID).broadcast(authData.userName(), load);
         }
         catch (Exception ex) {
@@ -126,7 +172,65 @@ public class WebSocketHandler {
         }
     }
 
-    private void leave() {}
+    private void leave(Session session, String msg) throws IOException {
+        try {
+            LeaveCommand cmd = gson.fromJson(msg, LeaveCommand.class);
+            AuthData authData = authDAO.getAuth(cmd.getAuthString());
+            GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
+            String color;
+            if (gameData.whiteUsername().equals(authData.userName())) {
+                color = "white";
+            }
+            else if (gameData.blackUsername().equals(authData.userName())) {
+                color = "black";
+            }
+            else {
+                ErrorMessage err = new ErrorMessage("You are not a player in this game");
+                session.getRemote().sendString(gson.toJson(err));
+                return;
+            }
 
-    private void resign() {}
+            gameDAO.leaveGame(cmd.gameID, color);
+            connections.get(cmd.gameID).remove(authData.userName());
+            NotificationMessage notification = new NotificationMessage(authData.userName() + " left the game.");
+            connections.get(cmd.gameID).broadcast(authData.userName(), notification);
+        }
+        catch (Exception ex) {
+            session.getRemote().sendString(gson.toJson(new ErrorMessage("Error: " + ex.getMessage())));
+        }
+    }
+
+    private void resign(Session session, String msg) throws IOException {
+        try {
+            LeaveCommand cmd = gson.fromJson(msg, LeaveCommand.class);
+            AuthData authData = authDAO.getAuth(cmd.getAuthString());
+            GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
+
+            if (gameData.game().getTeamTurn() == null) {
+                ErrorMessage err = new ErrorMessage("This game is already over");
+                session.getRemote().sendString(gson.toJson(err));
+            }
+            gameData.game().setTeamTurn(null);
+            GameService.updateGame(gameData, cmd.getAuthString(), authDAO, gameDAO);
+
+            // Notify all users that the player resigned
+            NotificationMessage notification = new NotificationMessage(authData.userName() + " just resigned.");
+            session.getRemote().sendString(gson.toJson(notification));
+            connections.get(cmd.gameID).broadcast(authData.userName(), notification);
+        }
+        catch (Exception ex) {
+            session.getRemote().sendString(gson.toJson(new ErrorMessage("Error: " + ex.getMessage())));
+        }
+    }
+
+    private GameData getGame(String auth, int gameID) throws ServerException, DataAccessException {
+        GameData gameData = null;
+        for (GameData game : GameService.listGames(auth, authDAO, gameDAO).games()) {
+            if (game.gameID() == gameID) {
+                gameData = game;
+                break;
+            }
+        }
+        return gameData;
+    }
 }

@@ -203,12 +203,9 @@ public class Client {
             try {
                 serverFacade.joinGame(colorStr, gameID, authToken);
 
-                ChessGame game = gameList.get(index).game();
-
+                GameData gameData = gameList.get(index);
                 TeamColor color = colorStr.equals("white") ? TeamColor.WHITE : TeamColor.BLACK;
-                repl.printMsg(Drawer.drawBoard(game.getBoard(), color));
-
-                gameplayClient = new GameplayClient(gameList.get(index), color, this);
+                gameplayClient = new GameplayClient(gameData, color, this);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
@@ -237,10 +234,8 @@ public class Client {
             try {
                 serverFacade.joinGame(null, gameID, authToken);
 
-                ChessGame game = gameList.get(index).game();
-                repl.printMsg(Drawer.drawBoard(game.getBoard(), TeamColor.WHITE));
-
-                gameplayClient = new GameplayClient(gameList.get(index), null, this);
+                GameData gameData = gameList.get(index);
+                gameplayClient = new GameplayClient(gameData, null, this);
                 state = State.GAMEPLAY;
             }
             catch (ServerException ex) {
