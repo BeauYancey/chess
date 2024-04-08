@@ -30,7 +30,7 @@ public class Repl {
         }
     }
 
-    private void printPrompt() {
+    public void printPrompt() {
         System.out.print(SET_TEXT_COLOR_GREEN + ">> " + SET_TEXT_COLOR_WHITE);
     }
 

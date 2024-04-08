@@ -49,4 +49,13 @@ public class GameService {
             gameDAO.joinGame(request.gameID(), username, request.playerColor());
         }
     }
+
+    public static void updateGame(GameData gameData, String authToken, AuthDAO authDAO, GameDAO gameDAO)
+            throws ServerException, DataAccessException {
+        AuthData authData = authDAO.getAuth(authToken);
+        if (authData == null) {
+            throw new ServerException(401, "Error: unauthorized");
+        }
+        gameDAO.updateGame(gameData.gameID(), gameData.game());
+    }
 }

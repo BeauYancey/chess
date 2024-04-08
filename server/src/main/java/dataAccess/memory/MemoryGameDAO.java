@@ -23,6 +23,16 @@ public class MemoryGameDAO implements GameDAO {
         return gameDatabase;
     }
 
+//    @Override
+//    public GameData getOne(int gameID) {
+//        for (GameData game : gameDatabase) {
+//            if (game.gameID() == gameID) {
+//                return game;
+//            }
+//        }
+//        return null;
+//    }
+
     @Override
     public int createGame(String gameName, ChessGame game) {
         gameDatabase.add(new GameData(++nextID, null, null, gameName, game));
@@ -54,6 +64,9 @@ public class MemoryGameDAO implements GameDAO {
         }
         throw new ServerException(400, "Error: bad request");
     }
+
+    @Override
+    public void updateGame(int gameId, ChessGame newGame) {}
 
     @Override
     public void removeAll() {

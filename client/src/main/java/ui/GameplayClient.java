@@ -7,20 +7,27 @@ import server.ServerFacade;
 import server.WebSocketFacade;
 
 public class GameplayClient {
-    ChessGame.TeamColor color;
-    GameData gameData;
-    Repl repl;
-    ServerFacade facade;
-    WebSocketFacade wsFacade;
-    String authToken;
+    private ChessGame.TeamColor color;
+    public GameData gameData;
+    public Repl repl;
+    private ServerFacade facade;
+    private WebSocketFacade wsFacade;
+    private String authToken;
 
     public GameplayClient(GameData gameData, ChessGame.TeamColor color, Client genClient) throws ServerException {
         this.color = color;
         this.gameData = gameData;
         this.repl = genClient.repl;
         this.facade = new ServerFacade(genClient.url);
-        this.wsFacade = new WebSocketFacade(genClient.url, repl);
+        this.wsFacade = new WebSocketFacade(genClient.url, this);
         this.authToken = genClient.authToken;
+
+        if (color != null) {
+            this.wsFacade.joinPlayer(this.authToken, this.gameData.gameID(), this.color);
+        }
+        else {
+            this.wsFacade.joinObserver(this.authToken, this.gameData.gameID());
+        }
     }
 
     public State eval(String input) {
@@ -60,7 +67,7 @@ public class GameplayClient {
         }
     }
 
-    private void draw() {
+    public void draw() {
         repl.printMsg(Drawer.drawBoard(gameData.game().getBoard(), color));
     }
 
@@ -106,7 +113,12 @@ public class GameplayClient {
     }
 
     private void leave() {
-        repl.printMsg("You entered leave");
+        try {
+            wsFacade.leave(authToken, gameData.gameID());
+        }
+        catch (ServerException ex) {
+            repl.printErr(ex.getMessage());
+        }
     }
 
     private ChessPiece.PieceType strToPiece(String pieceStr) {
