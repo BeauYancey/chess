@@ -23,16 +23,6 @@ public class MemoryGameDAO implements GameDAO {
         return gameDatabase;
     }
 
-//    @Override
-//    public GameData getOne(int gameID) {
-//        for (GameData game : gameDatabase) {
-//            if (game.gameID() == gameID) {
-//                return game;
-//            }
-//        }
-//        return null;
-//    }
-
     @Override
     public void leaveGame(int gameID, String color) {
         GameData gameData = null;
