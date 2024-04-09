@@ -1,6 +1,8 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataAccess.*;
 import exception.ServerException;
@@ -177,20 +179,13 @@ public class WebSocketHandler {
             LeaveCommand cmd = gson.fromJson(msg, LeaveCommand.class);
             AuthData authData = authDAO.getAuth(cmd.getAuthString());
             GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
-            String color;
-            if (gameData.whiteUsername().equals(authData.userName())) {
-                color = "white";
+            if (authData.userName().equals(gameData.whiteUsername())) {
+                gameDAO.leaveGame(gameData.gameID(), "white");
             }
-            else if (gameData.blackUsername().equals(authData.userName())) {
-                color = "black";
-            }
-            else {
-                ErrorMessage err = new ErrorMessage("You are not a player in this game");
-                session.getRemote().sendString(gson.toJson(err));
-                return;
+            else if (authData.userName().equals(gameData.blackUsername())) {
+                gameDAO.leaveGame(gameData.gameID(), "black");
             }
 
-            gameDAO.leaveGame(cmd.gameID, color);
             connections.get(cmd.gameID).remove(authData.userName());
             NotificationMessage notification = new NotificationMessage(authData.userName() + " left the game.");
             connections.get(cmd.gameID).broadcast(authData.userName(), notification);
@@ -206,10 +201,19 @@ public class WebSocketHandler {
             AuthData authData = authDAO.getAuth(cmd.getAuthString());
             GameData gameData = getGame(cmd.getAuthString(), cmd.gameID);
 
+            if (!(authData.userName().equals(gameData.blackUsername()) ||
+                    authData.userName().equals(gameData.whiteUsername()))) {
+                ErrorMessage err = new ErrorMessage("You are not a player in this game");
+                session.getRemote().sendString(gson.toJson(err));
+                return;
+            }
+
             if (gameData.game().getTeamTurn() == null) {
                 ErrorMessage err = new ErrorMessage("This game is already over");
                 session.getRemote().sendString(gson.toJson(err));
+                return;
             }
+            gameData.game().makeMove(new ChessMove(new ChessPosition(2, 2), new ChessPosition(4, 2), null));
             gameData.game().setTeamTurn(null);
             GameService.updateGame(gameData, cmd.getAuthString(), authDAO, gameDAO);
 

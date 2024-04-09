@@ -2,6 +2,8 @@ package dataAccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import model.GameData;
 import exception.ServerException;
 
@@ -170,7 +172,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(int gameID, ChessGame newGame) throws DataAccessException {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().serializeNulls().create();
         String statement = "UPDATE games SET game = ? WHERE id = ?";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {

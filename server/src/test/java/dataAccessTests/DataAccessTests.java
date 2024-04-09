@@ -1,6 +1,9 @@
 package dataAccessTests;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import dataAccess.*;
 import exception.ServerException;
 import model.*;
