@@ -61,7 +61,9 @@ public class WebSocketFacade extends Endpoint {
     private void loadGame(String message) {
         LoadGameMessage msg = gson.fromJson(message, LoadGameMessage.class);
         client.gameData = msg.game;
+        repl.printMsg("\b\b\b");
         client.draw();
+        repl.printPrompt();
     }
     private void notification(String message) {
         NotificationMessage msg = gson.fromJson(message, NotificationMessage.class);

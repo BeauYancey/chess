@@ -109,7 +109,12 @@ public class GameplayClient {
             repl.printErr("invalid instruction");
             return;
         }
-        repl.printMsg("You entered resign");
+        try {
+            wsFacade.resign(authToken, gameData.gameID());
+        }
+        catch (ServerException ex) {
+            repl.printErr(ex.getMessage());
+        }
     }
 
     private void leave() {
