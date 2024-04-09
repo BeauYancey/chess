@@ -44,12 +44,17 @@ public class HttpCommunicator {
             }
         }
         else {
-            MessageContainer msg;
-            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
-                msg = gson.fromJson(responseBody, MessageContainer.class);
-            }
-            throw new ServerException(responseCode, msg.message);
+            readError(responseCode, connection);
+            return null;
         }
+    }
+
+    private void readError(int responseCode, HttpURLConnection connection) throws IOException, ServerException {
+        MessageContainer msg;
+        try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
+            msg = gson.fromJson(responseBody, MessageContainer.class);
+        }
+        throw new ServerException(responseCode, msg.message);
     }
 
     public <T> T doPost(String path, Object req, String authToken, Class<T> responseClass)
@@ -75,11 +80,7 @@ public class HttpCommunicator {
 
         int responseCode = sendRequest(authToken, req, connection);
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            MessageContainer msg;
-            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
-                msg = gson.fromJson(responseBody, MessageContainer.class);
-            }
-            throw new ServerException(responseCode, msg.message);
+            readError(responseCode, connection);
         }
     }
 
@@ -110,11 +111,7 @@ public class HttpCommunicator {
 
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            MessageContainer msg;
-            try (InputStreamReader responseBody = new InputStreamReader(connection.getErrorStream())) {
-                msg = gson.fromJson(responseBody, MessageContainer.class);
-            }
-            throw new ServerException(responseCode, msg.message);
+            readError(responseCode, connection);
         }
     }
 }
